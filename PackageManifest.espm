@@ -1,0 +1,151 @@
+// /etc/esp/PackageManifest.espm
+// Manifest for esp packages
+// WARNING: HEAVILY WIP
+// Install commands- if quotes are used, MUST be single quotes.
+ESP_PACKAGE_MANIFEST
+{
+    PACKAGES
+    {
+        PACKAGE
+        {
+            $name = esp
+            $repositoryUrl = https://github.com/Mrcarrot1/esp.git
+            $description = ESP package manager
+            @important = True
+            INSTALL_COMMANDS
+            [
+                make -j $THREADS
+                make install
+            ]
+            FILES
+            [
+                /usr/bin/esp
+            ]
+            MAKE_DEPENDENCIES
+            [
+                dotnet
+            ]
+            DEPENDENCIES
+            [
+                bash
+            ]
+        }
+        PACKAGE
+        {
+            $name = esp-package-manifest
+            $repositoryUrl = https://github.com/AggravationOS/esp-package-manifest.git
+            $description = List of packages and install instructions for esp
+            @important = True
+            INSTALL_COMMANDS
+            [
+                make install
+            ]
+            FILES
+            [
+                /etc/esp/PackageManifest.esp
+            ]
+            DEPENDENCIES
+            [
+                esp
+            ]
+        }
+        PACKAGE
+        {
+            $name = pwsh
+            $repositoryUrl = https://github.com/PowerShell/PowerShell.git
+            $description = Microsoft PowerShell Core(default shell for AggravationOS)
+            INSTALL_COMMANDS
+            [
+                Import-Module ./build.psm1 -ArgumentList $true
+                Start-PSBootstrap
+                Start-PSBuild
+            ]
+            FILES
+            [
+
+            ]
+            MAKE_DEPENDENCIES
+            [
+                dotnet
+            ]
+            DEPENDENCIES
+            [
+                
+            ]
+        }
+        PACKAGE
+        {
+            $name = dotnet
+            $repositoryUrl = https://github.com/dotnet/installer
+            $description = .NET Core SDK and Runtime
+            INSTALL_COMMANDS
+            [
+                ./build.sh /p:ArcadeBuildTarball=true /p:TarballDir=/var/cache/esp/dotnetsources
+                cd /var/cache/esp/dotnetsources
+                ./prep.sh --bootstrap
+                ./build.sh
+            ]
+            FILES
+            [
+                /usr/share/dotnet/*
+                /usr/share/licenses/dotnet-sdk
+                /usr/share/licenses/dotnet-runtime
+            ]
+        }
+        PACKAGE
+        {
+            $name = coreutils
+            $repositoryUrl = git://git.sv.gnu.org/coreutils
+            $description = GNU CoreUtils
+            INSTALL_COMMANDS
+            [
+
+            ]
+        }
+        PACKAGE
+        {
+            $name = porth
+            $repositoryUrl = https://gitlab.com/tsoding/porth
+            $description = (WIP) Compiler for the Porth programming language created by Alexey Kutepov
+            MAKE_DEPENDENCIES
+            [
+                fasm
+            ]
+            DEPENDENCIES
+            [
+                fasm
+            ]
+            INSTALL_COMMANDS
+            [
+                fasm -m 524288 ./bootstrap/porth-linux-x86_64.fasm
+                chmod +x ./bootstrap/porth-linux-x86_64
+                ./bootstrap/porth-linux-x86_64 com ./porth.porth
+                ./porth com ./porth.porth
+                cp ./porth /usr/bin
+            ]
+        }
+        PACKAGE
+        {
+            $name = fasm
+            $repositoryUrl = https://github.com/tgrysztar/fasm
+            $description = Flat assembler
+        }
+    }
+    GROUPS
+    {
+        PACKAGE_GROUP
+        {
+            $name = base
+            $description = Packages required for a basic AggravationOS system
+            PACKAGES
+            [
+                linux
+                coreutils
+                pwsh
+                dotnet
+                esp
+                glibc
+            ]
+        }
+    }
+}
