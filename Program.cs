@@ -100,7 +100,8 @@ public class Program
         }
         if(packagesToInstallLater.Count > 0)
         {
-            string executablePath = $@"{System.AppContext.BaseDirectory}/{System.Reflection.Assembly.GetExecutingAssembly().GetName()}";
+            //I apologize on behalf of OOP for introducint this monstrosity of a one-line code statement to Linux package management
+            string executablePath = $@"{System.AppContext.BaseDirectory}/{System.Reflection.Assembly.GetExecutingAssembly().GetName().FullName.Split(',')[0]}";
             File.Copy(executablePath, $@"/home/{Environment.UserName}/.cache/esp/esp_temp");
             string packages = "";
             packagesToInstallLater.ForEach(x => packages += x + ' ');
