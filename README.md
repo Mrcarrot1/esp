@@ -6,5 +6,5 @@ To build esp:
 * Navigate to the repository's root directory
 * `make`
 * `sudo make install`
-* To run, you will need Microsoft Powershell Core accessible in the path as `pwsh` when run as root.
-* Please do not use esp on any distro other than AggravationOS. While it may work, it has a high chance of bricking the entire system.
+* To run, you will need `bash` and `sudo` installed.
+* You may also need to install other utilities to build and install many packages. These may or may not be available from your distribution's package manager. Support for cross-distro dependency management is a planned feature.
