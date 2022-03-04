@@ -141,7 +141,7 @@ public class Program
                 {
                     if(readingVar)
                     {
-                        if(!char.IsWhiteSpace(command[i]))
+                        if(!char.IsWhiteSpace(command[i]) && i != (command.Length - 1)) //Check for whitespace character or end of string
                             currentVar += command[i];
                         else
                         {
