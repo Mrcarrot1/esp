@@ -10,6 +10,7 @@ public class Program
     public static Dictionary<string, string> BuildVars = new Dictionary<string, string>();
     public static Dictionary<string, Package> Packages = new Dictionary<string, Package>();
     public static Dictionary<string, Package> InstalledPackages = new Dictionary<string, Package>();
+    private static List<string> packagesToInstallLater = new List<string>();
     private static KONParser manifestParser = KONParser.Default;
     private static KONWriter pkgWriter = new KONWriter(new KONWriterOptions(arrayInline: false));
 
@@ -34,6 +35,7 @@ public class Program
         };
         Package[] espDependencies = {};
         Package espPackage = new Package("esp", "esp package manager.", "git@github.com:Mrcarrot1/esp", espInstallCommands, espDependencies);
+        espPackage.InstallLater = true;
         Packages.Add("esp", espPackage);
 
         if(Environment.UserName == "root")
@@ -96,6 +98,14 @@ public class Program
                 }
             }
         }
+        if(packagesToInstallLater.Count > 0)
+        {
+            string executablePath = $@"{System.AppContext.BaseDirectory}/{System.Reflection.Assembly.GetExecutingAssembly().GetName()}";
+            File.Copy(executablePath, $@"/home/{Environment.UserName}/.cache/esp/esp_temp");
+            string packages = "";
+            packagesToInstallLater.ForEach(x => packages += x + ' ');
+            Process.Start($@"/home/{Environment.UserName}/.cache/esp/esp_temp", $"install {packages}");
+        }
     }
 
     /// <summary>
@@ -128,6 +138,12 @@ public class Program
         if(Packages.ContainsKey(package))
         {
             Package pkg = Packages[package];
+            if(pkg.InstallLater)
+            {
+                packagesToInstallLater.Add(package);
+                Console.WriteLine($"[esp] Installing marked package {package} later");
+                return;
+            }
             if(Directory.Exists($@"/home/{Environment.UserName}/.cache/esp/pkg/{pkg.Name}"))
                 ExecuteShellCommand($"git reset --hard; git pull", $@"/home/{Environment.UserName}/.cache/esp/pkg/{pkg.Name}");
             else
@@ -142,9 +158,9 @@ public class Program
                 {
                     if(readingVar)
                     {
-                        if(!char.IsWhiteSpace(command[i])) //Check for whitespace character, also found at the end of the string
+                        if(!char.IsWhiteSpace(command[i])) //Check for whitespace character to delineate variables
                             currentVar += command[i];
-                        else
+                        if(char.IsWhiteSpace(command[i]) || i == command.Length - 1) //Also check for end of string
                         {
                             if(BuildVars.ContainsKey(currentVar))
                                 commandFormatted = commandFormatted.Replace($"${currentVar}", BuildVars[currentVar]);
@@ -201,6 +217,12 @@ public class Package
     public List<string> InstallCommands { get; }
     public List<Package> Dependencies { get; }
     public List<Package> Dependents { get; }
+    /// <summary>
+    /// Whether or not to install the package later with a backed-up separate version of esp.
+    /// Primarily used to install esp itself.
+    /// </summary>
+    /// <value></value>
+    public bool InstallLater { get; internal set; }
 
     public Package(string name, string description, string cloneURL)
     {
@@ -214,7 +236,6 @@ public class Package
     public Package(string name, string description, string cloneURL, IEnumerable<string> installCommands, IEnumerable<Package> dependencies) : this(name, description, cloneURL)
     {
         InstallCommands = installCommands.ToList();
-        InstallCommands.ForEach(x => x += ' ');
         Dependencies = dependencies.ToList();
     }
 }
