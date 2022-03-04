@@ -136,8 +136,8 @@ public class Program
             string currentVar = "";
             foreach(string command in pkg.InstallCommands)
             {
-                //Add a space for formatting
-                string commandFormatted = command + ' ';
+                //Create a copy of the command string to modify
+                string commandFormatted = command;
                 for(int i = 0; i < command.Length; i++)
                 {
                     if(readingVar)
@@ -214,6 +214,7 @@ public class Package
     public Package(string name, string description, string cloneURL, IEnumerable<string> installCommands, IEnumerable<Package> dependencies) : this(name, description, cloneURL)
     {
         InstallCommands = installCommands.ToList();
+        InstallCommands.ForEach(x => x += ' ');
         Dependencies = dependencies.ToList();
     }
 }
