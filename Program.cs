@@ -55,6 +55,10 @@ public class Program
         }
         else
         {
+            if (args.Contains("--ignore-protected"))
+            {
+                ignoreProtected = true;
+            }
             if(args[0].ToLower() == "install")
             {
                 if(args.Length == 1)
@@ -99,16 +103,12 @@ public class Program
                     InstallPackage(pkg.Name);
                 }
             }
-            if (args.Contains("--ignore-protected"))
-            {
-                ignoreProtected = true;
-            }
         }
         if(packagesToInstallLater.Count > 0)
         {
             //I apologize on behalf of OOP for introducint this monstrosity of a one-line code statement to Linux package management
             string executablePath = $@"{System.AppContext.BaseDirectory}/{System.Reflection.Assembly.GetExecutingAssembly().GetName().FullName.Split(',')[0]}";
-            File.Copy(executablePath, $@"/home/{Environment.UserName}/.cache/esp/esp_temp");
+            File.Copy(executablePath, $@"/home/{Environment.UserName}/.cache/esp/esp_temp", true);
             string packages = "";
             packagesToInstallLater.ForEach(x => packages += x + ' ');
             Process.Start($@"/home/{Environment.UserName}/.cache/esp/esp_temp", $"install {packages} --ignore-protected");
