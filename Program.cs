@@ -33,7 +33,7 @@ public class Program
             "sudo make install"
         };
         Package[] espDependencies = {};
-        Package espPackage = new Package("esp", "esp package manager.", "https://github.com/Mrcarrot1/esp", espInstallCommands, espDependencies);
+        Package espPackage = new Package("esp", "esp package manager.", "git@github.com:Mrcarrot1/esp", espInstallCommands, espDependencies);
         Packages.Add("esp", espPackage);
 
         if(Environment.UserName == "root")
@@ -160,7 +160,7 @@ public class Program
                         readingVar = true;
                     }
                 }
-                ExecuteShellCommand(command, $@"/home/{Environment.UserName}/.cache/esp/pkg/{pkg.Name}");
+                ExecuteShellCommand(commandFormatted, $@"/home/{Environment.UserName}/.cache/esp/pkg/{pkg.Name}");
             }
         }
         else
