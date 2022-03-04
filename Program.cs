@@ -27,6 +27,15 @@ public class Program
         Package porthPackage = new Package("porth", "Compiler for the Porth programming language created by Alexey Kutepov.", "https://gitlab.com/tsoding/porth", porthInstallCommands, porthDependencies);
         Packages.Add("porth", porthPackage);
 
+        string[] espInstallCommands = 
+        {
+            "make -j $THREADS",
+            "sudo make install"
+        };
+        Package[] espDependencies = {};
+        Package espPackage = new Package("esp", "esp package manager.", "https://github.com/Mrcarrot1/esp", espInstallCommands, espDependencies);
+        Packages.Add("esp", espPackage);
+
         if(Environment.UserName == "root")
         {
             Console.ForegroundColor = ConsoleColor.Red;
@@ -39,7 +48,7 @@ public class Program
 
         if(args.Length == 0)
         {
-            Console.WriteLine("esp v1.0.0: Quick and easy packages from Git\n\nCommands: \n\nesp install <package> [additional packages]: Installs the specified package(s). \n\nesp uninstall <package>: Uninstalls the specified package. \n\nesp update [package(s)]: Updates the specified package(s), or all packages.");
+            Console.WriteLine("esp v1.0.0: Quick and easy packages from Git\n\nCommands: \n\nesp install <package> [additional packages]: Installs the specified package(s). \n\nesp list-installed: Lists all installed packages. \n\nesp uninstall <package>: Uninstalls the specified package. \n\nesp update [package(s)]: Updates the specified package(s), or all packages.");
         }
         else
         {
@@ -55,6 +64,17 @@ public class Program
                     {
                         InstallPackage(args[i]);
                     }
+                }
+            }
+            if(args[0].ToLower() == "list-installed")
+            {
+                if(InstalledPackages.Count == 0)
+                {
+                    Console.WriteLine("No packages installed.");
+                }
+                foreach(Package pkg in InstalledPackages.Values)
+                {
+                    Console.WriteLine($"{pkg.Name}: {pkg.Description}");
                 }
             }
             if(args[0].ToLower() == "uninstall")
