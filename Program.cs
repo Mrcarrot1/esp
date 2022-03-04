@@ -153,6 +153,8 @@ public class Program
                                 Console.WriteLine($"[esp] Error installing {package}: build variable ${currentVar} not found");
                                 Console.ResetColor();
                             }
+                            readingVar = false;
+                            currentVar = "";
                         }
                     }
                     if(command[i] == '$')
