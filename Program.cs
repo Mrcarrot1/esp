@@ -136,12 +136,13 @@ public class Program
             string currentVar = "";
             foreach(string command in pkg.InstallCommands)
             {
-                string commandFormatted = command;
+                //Add a space for formatting
+                string commandFormatted = command + ' ';
                 for(int i = 0; i < command.Length; i++)
                 {
                     if(readingVar)
                     {
-                        if(!char.IsWhiteSpace(command[i]) && i != (command.Length - 1)) //Check for whitespace character or end of string
+                        if(!char.IsWhiteSpace(command[i])) //Check for whitespace character, also found at the end of the string
                             currentVar += command[i];
                         else
                         {
