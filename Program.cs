@@ -11,6 +11,7 @@ public class Program
     public static Dictionary<string, Package> Packages = new Dictionary<string, Package>();
     public static Dictionary<string, Package> InstalledPackages = new Dictionary<string, Package>();
     private static List<string> packagesToInstallLater = new List<string>();
+    private static bool ignoreProtected = false;
     private static KONParser manifestParser = KONParser.Default;
     private static KONWriter pkgWriter = new KONWriter(new KONWriterOptions(arrayInline: false));
 
@@ -64,7 +65,8 @@ public class Program
                 {
                     for(int i = 1; i < args.Length; i++)
                     {
-                        InstallPackage(args[i]);
+                        if(!args[i].StartsWith("-")) //Check for esp flags and don't try to install them as packages
+                            InstallPackage(args[i]);
                     }
                 }
             }
@@ -97,6 +99,10 @@ public class Program
                     InstallPackage(pkg.Name);
                 }
             }
+            if (args.Contains("--ignore-protected"))
+            {
+                ignoreProtected = true;
+            }
         }
         if(packagesToInstallLater.Count > 0)
         {
@@ -105,7 +111,7 @@ public class Program
             File.Copy(executablePath, $@"/home/{Environment.UserName}/.cache/esp/esp_temp");
             string packages = "";
             packagesToInstallLater.ForEach(x => packages += x + ' ');
-            Process.Start($@"/home/{Environment.UserName}/.cache/esp/esp_temp", $"install {packages}");
+            Process.Start($@"/home/{Environment.UserName}/.cache/esp/esp_temp", $"install {packages} --ignore-protected");
         }
     }
 
@@ -139,7 +145,7 @@ public class Program
         if(Packages.ContainsKey(package))
         {
             Package pkg = Packages[package];
-            if(pkg.InstallLater)
+            if(pkg.InstallLater && !ignoreProtected)
             {
                 packagesToInstallLater.Add(package);
                 Console.WriteLine($"[esp] Installing marked package {package} later");
