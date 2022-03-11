@@ -3,6 +3,18 @@ ESP_INSTALLED_PACKAGES
     PACKAGE
     {
         $name = porth
-        
+        FILES
+        [
+            /usr/bin/porth
+        ]
+    }
+    PACKAGE
+    {
+        $name = esp
+        FILES
+        [
+            /usr/bin/esp
+            /usr/bin/esp-update
+        ]
     }
 }

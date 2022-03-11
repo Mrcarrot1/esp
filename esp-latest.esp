@@ -1,0 +1,9 @@
+//esp 1.0.0
+//Information for esp package manager.
+ESP_PACKAGE
+{
+    name = esp
+    version = 1.0.0
+    cloneURL = ssh://git@github.com:Mrcarrot1/esp.git
+    updateURL = https://raw.githubusercontent.com/Mrcarrot1/esp/main/esp-latest.esp?token=GHSAT0AAAAAABQCIF2IQSKV54IAN6FNB7CUYRLVLPQ
+}

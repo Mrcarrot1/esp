@@ -1,0 +1,12 @@
+#!/bin/bash
+
+echo "esp self-update script: used to install updates to esp from a temporary location to /usr/bin/esp."
+
+if [ "$EUID" -ne 0 ]
+then
+    echo "This script must be run as root!"
+    exit
+fi
+
+mv /usr/bin/esp_temp /usr/bin/esp
+chmod +x /usr/bin/esp

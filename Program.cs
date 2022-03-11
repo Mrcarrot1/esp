@@ -10,7 +10,6 @@ public class Program
     public static Dictionary<string, string> BuildVars = new Dictionary<string, string>();
     public static Dictionary<string, Package> Packages = new Dictionary<string, Package>();
     public static Dictionary<string, Package> InstalledPackages = new Dictionary<string, Package>();
-    private static List<string> packagesToInstallLater = new List<string>();
     private static bool ignoreProtected = false;
     private static KONParser manifestParser = KONParser.Default;
     private static KONWriter pkgWriter = new KONWriter(new KONWriterOptions(arrayInline: false));
@@ -32,17 +31,17 @@ public class Program
         string[] espInstallCommands = 
         {
             "make -j $THREADS",
-            "sudo make install"
+            "sudo make install-esp",
+            "echo -e 'An updated version of esp has been installed to a temporary location.\nPlease run esp-update as root to install it.'"
         };
         Package[] espDependencies = {};
         Package espPackage = new Package("esp", "esp package manager.", "git@github.com:Mrcarrot1/esp", espInstallCommands, espDependencies);
-        espPackage.InstallLater = true;
         Packages.Add("esp", espPackage);
 
         if(Environment.UserName == "root")
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("esp cannot be run as root!");
+            Console.WriteLine("esp must not be run as root!");
             Console.ResetColor();
             return;
         }
@@ -55,10 +54,6 @@ public class Program
         }
         else
         {
-            if (args.Contains("--ignore-protected"))
-            {
-                ignoreProtected = true;
-            }
             if(args[0].ToLower() == "install")
             {
                 if(args.Length == 1)
@@ -104,15 +99,6 @@ public class Program
                 }
             }
         }
-        if(packagesToInstallLater.Count > 0)
-        {
-            //I apologize on behalf of OOP for introducint this monstrosity of a one-line code statement to Linux package management
-            string executablePath = $@"{System.AppContext.BaseDirectory}/{System.Reflection.Assembly.GetExecutingAssembly().GetName().FullName.Split(',')[0]}";
-            File.Copy(executablePath, $@"/home/{Environment.UserName}/.cache/esp/esp_temp", true);
-            string packages = "";
-            packagesToInstallLater.ForEach(x => packages += x + ' ');
-            Process.Start($@"/home/{Environment.UserName}/.cache/esp/esp_temp", $"install {packages} --ignore-protected");
-        }
     }
 
     /// <summary>
@@ -127,7 +113,8 @@ public class Program
         }
         ProcessStartInfo startInfo = new ProcessStartInfo("bash", $"-c \"{command}\"");
         startInfo.WorkingDirectory = cwd;
-        Console.WriteLine(command);
+        if(command.Split(' ')[0] != "echo" || command.Contains(">") || command.Contains("<") || command.Contains("|")) //If the command is just echo and hasn't been piped anywhere, don't bother printing it out first.
+            Console.WriteLine(command);
         var process = Process.Start(startInfo);
         if(process != null)
             process.WaitForExit();
@@ -145,12 +132,6 @@ public class Program
         if(Packages.ContainsKey(package))
         {
             Package pkg = Packages[package];
-            if(pkg.InstallLater && !ignoreProtected)
-            {
-                packagesToInstallLater.Add(package);
-                Console.WriteLine($"[esp] Installing marked package {package} later");
-                return;
-            }
             if(Directory.Exists($@"/home/{Environment.UserName}/.cache/esp/pkg/{pkg.Name}"))
                 ExecuteShellCommand($"git reset --hard; git pull", $@"/home/{Environment.UserName}/.cache/esp/pkg/{pkg.Name}");
             else
@@ -197,22 +178,7 @@ public class Program
 
     public static void LoadData()
     {
-        //Load full package manifest
-        if(File.Exists(@"/etc/esp/PackageManifest.espm"))
-        {
-
-        }
-        //Hardcoded failsafe- if the manifest doesn't exist, download it
-        else
-        {
-            string[] manifestInstallCommands = 
-            {
-                "make install"
-            };
-            Package[] manifestDependencies = {};
-            Packages.Add("esp-package-manifest", new Package("esp-package-manifest", "esp package data", "https://github.com/AggravationOS/esp-package-manifest.git", manifestInstallCommands, manifestDependencies));
-            InstallPackage("esp-package-manifest");
-        }
+        
     }
 }
 
@@ -224,12 +190,6 @@ public class Package
     public List<string> InstallCommands { get; }
     public List<Package> Dependencies { get; }
     public List<Package> Dependents { get; }
-    /// <summary>
-    /// Whether or not to install the package later with a backed-up separate version of esp.
-    /// Primarily used to install esp itself.
-    /// </summary>
-    /// <value></value>
-    public bool InstallLater { get; internal set; }
 
     public Package(string name, string description, string cloneURL)
     {
