@@ -1,5 +1,5 @@
-# esp: The World's Worst Linux Package Manager
-esp is a poorly-designed package manager designed for AggravationOS. It is written in C# and has more dependencies than any package manager should.
+# esp: Quick and Easy LinuxⓇ Packages from Source
+esp is a package manager designed to build packages from source. It is based on spm, an unreleased package manager designed to be intentionally terrible, but I realized that it was actually pretty cool, so here we are.
 
 To build esp:
 * Ensure that you have the .NET Core SDK >= 6.0 installed.
