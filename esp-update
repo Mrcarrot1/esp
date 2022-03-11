@@ -8,5 +8,11 @@ then
     exit
 fi
 
-mv /usr/bin/esp_temp /usr/bin/esp
-chmod +x /usr/bin/esp
+if [ -f "/usr/bin/esp_temp" ]
+then
+    mv /usr/bin/esp_temp /usr/bin/esp
+    chmod +x /usr/bin/esp
+    echo "Finished installing esp."
+else
+    echo "A temporary version of esp could not be found!"
+fi
