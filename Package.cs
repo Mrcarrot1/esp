@@ -96,14 +96,14 @@ public struct PackageVersion
         }
         else
         {
-            SemanticVersion semVer = new SemanticVersion(versionString);
-            Major = semVer.Major;
-            Minor = semVer.Minor;
-            Patch = semVer.Patch;
+            Version ver = new Version(versionSplit[0]);
+            Major = ver.Major;
+            Minor = ver.Minor;
+            Patch = ver.Revision;
             Rolling = false;
-            Prerelease = semVer.PreReleaseLabel != null && semVer.PreReleaseLabel != "";
+            Prerelease = versionSplit.Length > 1;
             if(Prerelease)
-                PrereleaseType = semVer.PreReleaseLabel;
+                PrereleaseType = versionSplit[1];
             else
                 PrereleaseType = null;
         }
