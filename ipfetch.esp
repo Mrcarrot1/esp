@@ -15,5 +15,6 @@ ESP_PACKAGE
     UNINSTALL_COMMANDS
     [
         sudo rm /usr/bin/ipfetch
+        sudo rm -r /usr/share/ipfetch
     ]
 }
