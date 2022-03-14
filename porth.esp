@@ -1,0 +1,23 @@
+//porth rolling
+//Information for esp package manager
+ESP_PACKAGE
+{
+    name = porth
+    type = Git
+    description = (WIP) Compiler for the Porth programming language created by Alexey Kutepov.
+    version = rolling
+    cloneURL = https://gitlab.com/tsoding/porth.git
+    updateURL = https://raw.githubusercontent.com/Mrcarrot1/esp/main/porth.esp?token=GHSAT0AAAAAABQCIF2IQSKV54IAN6FNB7CUYRLVLPQ
+    FILES
+    [
+        /usr/bin/porth
+    ]
+    INSTALL_COMMANDS
+    [
+        fasm -m 524288 ./bootstrap/porth-linux-x86_64.fasm
+        chmod +x ./bootstrap/porth-linux-x86_64
+        ./bootstrap/porth-linux-x86_64 com ./porth.porth
+        ./porth com ./porth.porth
+        sudo cp ./porth /usr/bin
+    ]
+}

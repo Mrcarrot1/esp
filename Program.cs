@@ -5,204 +5,205 @@ using System.Diagnostics;
 using System.Linq;
 using KarrotObjectNotation;
 
-public class Program
+namespace Esp
 {
-    public static Dictionary<string, string> BuildVars = new Dictionary<string, string>();
-    public static Dictionary<string, Package> Packages = new Dictionary<string, Package>();
-    public static Dictionary<string, Package> InstalledPackages = new Dictionary<string, Package>();
-    private static bool ignoreProtected = false;
-    private static KONParser manifestParser = KONParser.Default;
-    private static KONWriter pkgWriter = new KONWriter(new KONWriterOptions(arrayInline: false));
-
-    public static void Main(string[] args)
+    public class Program
     {
-        string[] porthInstallCommands = 
-        {
-            "fasm -m 524288 ./bootstrap/porth-linux-x86_64.fasm",
-            "chmod +x ./bootstrap/porth-linux-x86_64",
-            "./bootstrap/porth-linux-x86_64 com ./porth.porth",
-            "./porth com ./porth.porth",
-            "sudo cp ./porth /usr/bin"
-        };
-        Package[] porthDependencies = {};
-        Package porthPackage = new Package("porth", "Compiler for the Porth programming language created by Alexey Kutepov.", "https://gitlab.com/tsoding/porth", porthInstallCommands, porthDependencies);
-        Packages.Add("porth", porthPackage);
+        public static Dictionary<string, string> BuildVars = new Dictionary<string, string>();
+        public static Dictionary<string, IPackage> Packages = new Dictionary<string, IPackage>();
+        public static Dictionary<string, IPackage> InstalledPackages = new Dictionary<string, IPackage>();
+        private static bool ignoreProtected = false;
 
-        string[] espInstallCommands = 
+        public static void Main(string[] args)
         {
-            "make -j $THREADS",
-            "sudo make install-esp",
-            "echo -e 'An updated version of esp has been installed to a temporary location.\nPlease run esp-update as root to install it.'"
-        };
-        Package[] espDependencies = {};
-        Package espPackage = new Package("esp", "esp package manager.", "git@github.com:Mrcarrot1/esp", espInstallCommands, espDependencies);
-        Packages.Add("esp", espPackage);
-
-        if(Environment.UserName == "root")
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("esp must not be run as root!");
-            Console.ResetColor();
-            return;
-        }
-
-        BuildVars.Add("THREADS", Environment.ProcessorCount.ToString());
-
-        if(args.Length == 0)
-        {
-            Console.WriteLine("esp v1.0.0: Quick and easy packages from Git\n\nCommands: \n\nesp install <package> [additional packages]: Installs the specified package(s). \n\nesp list-installed: Lists all installed packages. \n\nesp uninstall <package>: Uninstalls the specified package. \n\nesp update [package(s)]: Updates the specified package(s), or all packages.");
-        }
-        else
-        {
-            if(args[0].ToLower() == "install")
+            /* string[] porthInstallCommands = 
             {
-                if(args.Length == 1)
-                {
-                    Console.WriteLine($"Usage: esp {args[0]} <package>");
-                }
-                else
-                {
-                    for(int i = 1; i < args.Length; i++)
-                    {
-                        if(!args[i].StartsWith("-")) //Check for esp flags and don't try to install them as packages
-                            InstallPackage(args[i]);
-                    }
-                }
-            }
-            if(args[0].ToLower() == "list-installed")
-            {
-                if(InstalledPackages.Count == 0)
-                {
-                    Console.WriteLine("No packages installed.");
-                }
-                foreach(Package pkg in InstalledPackages.Values)
-                {
-                    Console.WriteLine($"{pkg.Name}: {pkg.Description}");
-                }
-            }
-            if(args[0].ToLower() == "uninstall")
-            {
-                if(args.Length == 1)
-                {
-                    Console.WriteLine($"Usage: esp {args[0]} <package>");
-                }
-                else
-                {
-                    //TODO: Implement uninstall
-                }
-            }
-            if(args[0].ToLower() == "update")
-            {
-                foreach(Package pkg in InstalledPackages.Values)
-                {
-                    InstallPackage(pkg.Name);
-                }
-            }
-        }
-    }
+                "fasm -m 524288 ./bootstrap/porth-linux-x86_64.fasm",
+                "chmod +x ./bootstrap/porth-linux-x86_64",
+                "./bootstrap/porth-linux-x86_64 com ./porth.porth",
+                "./porth com ./porth.porth",
+                "sudo cp ./porth /usr/bin"
+            };
+            IPackage[] porthDependencies = {};
+            GitPackage porthPackage = new GitPackage("porth", "Compiler for the Porth programming language created by Alexey Kutepov.", "https://gitlab.com/tsoding/porth", porthInstallCommands, porthDependencies);
+            Packages.Add("porth", porthPackage);
 
-    /// <summary>
-    /// Executes the specified bash command.
-    /// </summary>
-    /// <param name="command"></param>
-    public static void ExecuteShellCommand(string command, string? cwd = null)
-    {
-        if(cwd == null)
-        {
-            cwd = Environment.CurrentDirectory;
-        }
-        ProcessStartInfo startInfo = new ProcessStartInfo("bash", $"-c \"{command}\"");
-        startInfo.WorkingDirectory = cwd;
-        if(command.Split(' ')[0] != "echo" || command.Contains(">") || command.Contains("<") || command.Contains("|")) //If the command is just echo and hasn't been piped anywhere, don't bother printing it out first.
-            Console.WriteLine(command);
-        var process = Process.Start(startInfo);
-        if(process != null)
-            process.WaitForExit();
-        else
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"[esp] Command \"{command}\" failed to run!");
-            Console.ResetColor();
-        }
-    }
+            string[] espInstallCommands = 
+            {
+                "make -j $THREADS",
+                "sudo make install-esp",
+                "echo -e 'An updated version of esp has been installed to a temporary location.\nPlease run esp-update as root to install it.'"
+            };
+            IPackage[] espDependencies = {};
+            GitPackage espPackage = new GitPackage("esp", "esp package manager.", "git@github.com:Mrcarrot1/esp", espInstallCommands, espDependencies);
+            Packages.Add("esp", espPackage); */
 
-    public static void InstallPackage(string package)
-    {
-        Directory.CreateDirectory($@"/home/{Environment.UserName}/.cache/esp/pkg");
-        if(Packages.ContainsKey(package))
-        {
-            Package pkg = Packages[package];
-            if(Directory.Exists($@"/home/{Environment.UserName}/.cache/esp/pkg/{pkg.Name}"))
-                ExecuteShellCommand($"git reset --hard; git pull", $@"/home/{Environment.UserName}/.cache/esp/pkg/{pkg.Name}");
+            GitPackage espPackage = GitPackage.LoadFromFile($@"/home/mrcarrot/esp/esp-latest.esp");
+            Packages.Add("esp", espPackage);
+
+            if(Environment.UserName == "root")
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("esp must not be run as root!");
+                Console.ResetColor();
+                return;
+            }
+
+            BuildVars.Add("THREADS", Environment.ProcessorCount.ToString());
+
+            if(args.Length == 0)
+            {
+                Console.WriteLine("esp v1.0.0: Quick and easy packages from Git\n\nCommands: \n\nesp install <package> [additional packages]: Installs the specified package(s). \n\nesp list-installed: Lists all installed packages. \n\nesp uninstall <package>: Uninstalls the specified package. \n\nesp update [package(s)]: Updates the specified package(s), or all packages.");
+            }
             else
-                ExecuteShellCommand($"git clone {pkg.CloneURL} /home/{Environment.UserName}/.cache/esp/pkg/{pkg.Name}");
-            bool readingVar = false;
-            string currentVar = "";
-            foreach(string command in pkg.InstallCommands)
             {
-                //Create a copy of the command string to modify
-                string commandFormatted = command;
-                for(int i = 0; i < command.Length; i++)
+                if(args[0].ToLower() == "install")
                 {
-                    if(readingVar)
+                    if(args.Length == 1)
                     {
-                        if(!char.IsWhiteSpace(command[i])) //Check for whitespace character to delineate variables
-                            currentVar += command[i];
-                        if(char.IsWhiteSpace(command[i]) || i == command.Length - 1) //Also check for end of string
+                        Console.WriteLine($"Usage: esp {args[0]} <package>");
+                    }
+                    else
+                    {
+                        for(int i = 1; i < args.Length; i++)
                         {
-                            if(BuildVars.ContainsKey(currentVar))
-                                commandFormatted = commandFormatted.Replace($"${currentVar}", BuildVars[currentVar]);
-                            else
-                            {
-                                Console.ForegroundColor = ConsoleColor.Red;
-                                Console.WriteLine($"[esp] Error installing {package}: build variable ${currentVar} not found");
-                                Console.ResetColor();
-                            }
-                            readingVar = false;
-                            currentVar = "";
+                            if(!args[i].StartsWith("-")) //Check for esp flags and don't try to install them as packages
+                                InstallPackage(args[i]);
                         }
                     }
-                    if(command[i] == '$')
+                }
+                if(args[0].ToLower() == "list-installed")
+                {
+                    if(InstalledPackages.Count == 0)
                     {
-                        readingVar = true;
+                        Console.WriteLine("No packages installed.");
+                    }
+                    foreach(IPackage pkg in InstalledPackages.Values)
+                    {
+                        Console.WriteLine($"{pkg.Name}: {pkg.Description}");
                     }
                 }
-                ExecuteShellCommand(commandFormatted, $@"/home/{Environment.UserName}/.cache/esp/pkg/{pkg.Name}");
+                if(args[0].ToLower() == "uninstall")
+                {
+                    if(args.Length == 1)
+                    {
+                        Console.WriteLine($"Usage: esp {args[0]} <package>");
+                    }
+                    else
+                    {
+                        for(int i = 1; i < args.Length; i++)
+                        {
+                            if(!args[i].StartsWith("-")) //Check for esp flags and don't try to install them as packages
+                                UninstallPackage(args[i]);
+                        }
+                    }
+                }
+                if(args[0].ToLower() == "update")
+                {
+                    foreach(IPackage pkg in InstalledPackages.Values)
+                    {
+                        InstallPackage(pkg.Name);
+                    }
+                }
             }
         }
-        else
-        {
-            Console.WriteLine($"{package}: package not found!");
-        }
-    }
 
-    public static void LoadData()
-    {
         
-    }
-}
 
-public class Package
-{
-    public string Name { get; }
-    public string Description { get; }
-    public string CloneURL { get; }
-    public List<string> InstallCommands { get; }
-    public List<Package> Dependencies { get; }
-    public List<Package> Dependents { get; }
+        public static void InstallPackage(string package)
+        {
+            Directory.CreateDirectory($@"/home/{Environment.UserName}/.cache/esp/pkg");
+            if(Packages.ContainsKey(package))
+            {
+                IPackage pkg = Packages[package];
+                if(pkg is GitPackage gitPkg)
+                {
+                    if(Directory.Exists($@"/home/{Environment.UserName}/.cache/esp/pkg/{pkg.Name}"))
+                        Utils.ExecuteShellCommand($"git reset --hard; git pull", $@"/home/{Environment.UserName}/.cache/esp/pkg/{pkg.Name}");
+                    else
+                        Utils.ExecuteShellCommand($"git clone {gitPkg.CloneURL} /home/{Environment.UserName}/.cache/esp/pkg/{pkg.Name}");
+                }
+                //Implement other package types:
+                //Tarball
+                //Other- install commands include download instructions
+                
+                foreach(string command in pkg.InstallCommands)
+                {
+                    //Create a copy of the command string to modify
+                    string commandFormatted = Utils.FormatCommand(command, package);
+                    //Run the command
+                    Utils.RunCommand(commandFormatted, $@"/home/{Environment.UserName}/.cache/esp/pkg/{pkg.Name}");
+                }
+                InstalledPackages.Add(package, pkg);
+            }
+            else
+            {
+                Console.WriteLine($"{package}: package not found!");
+            }
+        }
 
-    public Package(string name, string description, string cloneURL)
-    {
-        Name = name;
-        Description = description;
-        CloneURL = cloneURL;
-        InstallCommands = new List<string>();
-        Dependencies = new List<Package>();
-        Dependents = new List<Package>();
-    }
-    public Package(string name, string description, string cloneURL, IEnumerable<string> installCommands, IEnumerable<Package> dependencies) : this(name, description, cloneURL)
-    {
-        InstallCommands = installCommands.ToList();
-        Dependencies = dependencies.ToList();
+        public static void UninstallPackage(string package)
+        {
+            if(!InstalledPackages.ContainsKey(package))
+            {
+                Console.WriteLine($"Package {package} is not installed!");
+                return;
+            }
+
+            IPackage pkg = InstalledPackages[package];
+            foreach(string command in pkg.UninstallCommands)
+            {
+                string commandFormatted = Utils.FormatCommand(command, package);
+                Utils.RunCommand(commandFormatted, Environment.CurrentDirectory);
+            }
+        }
+
+        public static void LoadData()
+        {
+            
+        }
+
+        /// <summary>
+        /// Compares two version strings. Returns -1 if the current version is older, 0 if they are the same, and 1 if the current version is newer.
+        /// </summary>
+        /// <param name="currentVersion"></param>
+        /// <param name="otherVersion"></param>
+        /// <returns></returns>
+        public static int CompareVersions(PackageVersion currentVersion, PackageVersion otherVersion)
+        {
+            //If it's a rolling release, assume the other version is newer
+            if(otherVersion.Rolling)
+            {
+                return -1;
+            }
+
+            //Check major version numbers
+            if(otherVersion.Major > currentVersion.Major) return -1;
+            if(otherVersion.Major < currentVersion.Major) return 1;
+
+            //Check minor version numbers
+            if(otherVersion.Minor > currentVersion.Minor) return -1;
+            if(otherVersion.Minor < currentVersion.Minor) return 1;
+
+            //Check patch numbers
+            if(otherVersion.Patch > currentVersion.Patch) return -1;
+            if(otherVersion.Patch < currentVersion.Patch) return 1;
+
+            //If all the previous checks were false, the version numbers are equal.
+            //The prerelease of a given version is assumed to be older.
+            if(otherVersion.Prerelease && !currentVersion.Prerelease) return 1;
+            if(currentVersion.Prerelease && !otherVersion.Prerelease) return -1;
+
+            //If both are prereleases of the same version, check their labels against each other
+            if(currentVersion.Prerelease && otherVersion.Prerelease)
+            {
+                //Sort the strings alphabetically, then return that in reverse.
+                //This is because of the way that semantic versioning handles prerelease labels.
+                return -StringComparer.InvariantCulture.Compare(currentVersion.PrereleaseType, otherVersion.PrereleaseType);
+            }
+
+            //If we get to this point, the versions are equal.
+            return 0;
+        }
     }
 }
