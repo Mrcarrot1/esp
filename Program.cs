@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using KarrotObjectNotation;
 
 namespace Esp
@@ -53,7 +54,7 @@ namespace Esp
 
             if(args.Length == 0)
             {
-                Console.WriteLine("esp v1.0.0: Quick and easy packages from Git\n\nCommands: \n\nesp install <package> [additional packages]: Installs the specified package(s). \n\nesp list-installed: Lists all installed packages. \n\nesp uninstall <package>: Uninstalls the specified package. \n\nesp update [package(s)]: Updates the specified package(s), or all packages.");
+                Console.WriteLine($"esp v0.1.0: Quick and easy packages from source\n\nCommands: \n\nesp install <package> [additional packages]: Installs the specified package(s). \n\nesp list-installed: Lists all installed packages. \n\nesp uninstall <package>: Uninstalls the specified package. \n\nesp update [package(s)]: Updates the specified package(s), or all packages.");
             }
             else
             {
