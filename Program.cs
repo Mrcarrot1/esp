@@ -153,9 +153,9 @@ namespace Esp
                         //Create a copy of the command string to reformat.
                         string commandFormatted = Utils.FormatCommand(command);
                         //Run the command- note that RunCommand includes esp built-in commands, whereas ExecuteShellCommand does not.
-                        Utils.RunCommand(commandFormatted, Environment.CurrentDirectory);
+                        Utils.RunCommand(commandFormatted, $@"{Utils.HomePath}/.cache/esp/pkg/{pkg.Name}");
                     }
-                    catch(FormatException e)
+                    catch(Exception e)
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine($"[esp] Error installing {package}: {e.Message}");
