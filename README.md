@@ -36,5 +36,6 @@ ESP_PACKAGE
         esp no-yes Are you sure? Continuing will remove esp. //esp built-in command interpreted by the application-used for integration with install process
         echo -e 'esp is not able to uninstall itself.\n Run esp-uninstall as root to remove it.'
     ]
-}```
+}
+```
 The beginning lines should contain comments that let a human reader know what the file contains. The first line should have the package name and version, while the second should state that the file is an esp package.
