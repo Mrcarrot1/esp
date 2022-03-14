@@ -68,8 +68,8 @@ public struct PackageVersion
 
     public override string ToString()
     {
-        if(Rolling) return "rolling";
         string output = $"{Major}.{Minor}.{Patch}";
+        if(Rolling) output =  "rolling";
         if(Prerelease) output += $"-{PrereleaseType}";
         return output;
     }
