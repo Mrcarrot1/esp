@@ -2,19 +2,60 @@ ESP_INSTALLED_PACKAGES
 {
     PACKAGE
     {
-        $name = porth
-        FILES
+        name = esp
+        description = esp package manager.
+        type = Git //Can be Git, Tarball, or Other
+        version = 0.1.0
+        cloneURL = https://github.com/Mrcarrot1/esp.git
+        updateURL = https://raw.githubusercontent.com/Mrcarrot1/esp/main/esp-latest.esp
+        INSTALL_COMMANDS
         [
-            /usr/bin/porth
+            make -j $THREADS
+            sudo make install-esp
+            echo -e 'An updated version of esp has been installed to a temporary location.\nPlease run esp-update as root to install it.'
+        ]
+        UNINSTALL_COMMANDS
+        [
+            esp no-yes Are you sure? Continuing will remove esp.
+            echo -e 'esp is not able to uninstall itself.\nRun esp-uninstall as root to remove it.'
         ]
     }
     PACKAGE
     {
-        $name = esp
-        FILES
+        name = porth
+        type = Git
+        description = (WIP) Compiler for the Porth programming language created by Alexey Kutepov.
+        version = rolling
+        cloneURL = https://gitlab.com/tsoding/porth.git
+        updateURL = https://raw.githubusercontent.com/Mrcarrot1/esp/main/porth.esp
+        INSTALL_COMMANDS
         [
-            /usr/bin/esp
-            /usr/bin/esp-update
+            fasm -m 524288 ./bootstrap/porth-linux-x86_64.fasm
+            chmod +x ./bootstrap/porth-linux-x86_64
+            ./bootstrap/porth-linux-x86_64 com ./porth.porth
+            ./porth com ./porth.porth
+            sudo cp ./porth /usr/bin
+        ]
+        UNINSTALL_COMMANDS
+        [
+            sudo rm /usr/bin/porth
+        ]
+    }
+    PACKAGE
+    {
+        name = ipfetch
+        description = Neofetch like tool that can look up IPs.
+        type = Git
+        version = rolling
+        cloneURL = https://github.com/trakBan/ipfetch
+        updateURL = https://raw.githubusercontent.com/Mrcarrot1/esp/main/ipfetch.esp
+        INSTALL_COMMANDS
+        [
+            sh setup.sh
+        ]
+        UNINSTALL_COMMANDS
+        [
+            sudo rm /usr/bin/ipfetch
         ]
     }
 }

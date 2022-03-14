@@ -13,10 +13,10 @@ namespace Esp
         public static Dictionary<string, string> BuildVars = new Dictionary<string, string>();
         public static Dictionary<string, IPackage> Packages = new Dictionary<string, IPackage>();
         public static Dictionary<string, IPackage> InstalledPackages = new Dictionary<string, IPackage>();
-        private static bool ignoreProtected = false;
 
         public static void Main(string[] args)
         {
+            LoadData();
             /* string[] porthInstallCommands = 
             {
                 "fasm -m 524288 ./bootstrap/porth-linux-x86_64.fasm",
@@ -87,7 +87,7 @@ namespace Esp
                     }
                     foreach(IPackage pkg in InstalledPackages.Values)
                     {
-                        Console.WriteLine($"{pkg.Name}: {pkg.Description}");
+                        Console.WriteLine($"{pkg.Name} {pkg.Version}");
                     }
                 }
                 if(args[0].ToLower() == "uninstall")
@@ -107,9 +107,15 @@ namespace Esp
                 }
                 if(args[0].ToLower() == "update")
                 {
-                    foreach(IPackage pkg in InstalledPackages.Values)
+                    foreach(IPackage pkg in InstalledPackages.Values.ToArray())
                     {
-                        InstallPackage(pkg.Name);
+                        Directory.CreateDirectory($@"{Utils.HomePath}/.cache/esp/pkgs");
+                        Utils.ExecuteShellCommand($"curl {pkg.UpdateURL} -o {Utils.HomePath}/.cache/esp/pkgs/{pkg.Name}-temp.esp");
+                        GitPackage package = GitPackage.LoadFromFile($@"{Utils.HomePath}/.cache/esp/pkgs/{pkg.Name}-temp.esp");
+                        if(CompareVersions(pkg.Version, package.Version) == -1)
+                        {
+                            InstallPackage($@"{Utils.HomePath}/.cache/esp/pkgs/{pkg.Name}-temp.esp");
+                        }
                     }
                 }
             }
@@ -162,6 +168,8 @@ namespace Esp
                         Console.ResetColor();
                     }
                 }
+                if(InstalledPackages.ContainsKey(package))
+                    InstalledPackages.Remove(package);
                 InstalledPackages.Add(package, pkg);
             }
         }
@@ -193,6 +201,22 @@ namespace Esp
 
         public static void LoadData()
         {
+            if(File.Exists("/var/esp/InstalledPackages.esp"))
+            {
+                KONNode installedPkgsNode = KONParser.Default.Parse(File.ReadAllText("/var/esp/InstalledPackages.esp"));
+                foreach(KONNode node in installedPkgsNode.Children)
+                {
+                    if(node.Name == "PACKAGE")
+                    {
+                        if((string)node.Values["type"] == "Git")
+                        {
+                            GitPackage pkg = GitPackage.ParseFromString(KONWriter.Default.Write(node));
+                            Packages.Add(pkg.Name, pkg);
+                            InstalledPackages.Add(pkg.Name, pkg);
+                        }
+                    }
+                }
+            }
             
         }
 

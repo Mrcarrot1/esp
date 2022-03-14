@@ -19,6 +19,7 @@ public interface IPackage
     /// </summary>
     /// <value></value>
     string Description { get; }
+    string UpdateURL { get; }
     /// <summary>
     /// The package's version.
     /// </summary>
@@ -36,6 +37,10 @@ public interface IPackage
     /// </summary>
     /// <value></value>
     List<string> InstallCommands { get; }
+    /// <summary>
+    /// List of commands to run to uninstall the package.
+    /// </summary>
+    /// <value></value>
     List<string> UninstallCommands { get; }
 }
 
@@ -99,7 +104,7 @@ public struct PackageVersion
             Version ver = new Version(versionSplit[0]);
             Major = ver.Major;
             Minor = ver.Minor;
-            Patch = ver.Revision;
+            Patch = ver.Build;
             Rolling = false;
             Prerelease = versionSplit.Length > 1;
             if(Prerelease)
@@ -125,6 +130,7 @@ public class GitPackage : IPackage
             return PackageType.Git;
         } 
     }
+    public string UpdateURL { get; }
     /// <summary>
     /// The URL of the Git repository that contains the package source.
     /// </summary>
@@ -135,17 +141,18 @@ public class GitPackage : IPackage
     public List<IPackage> Dependencies { get; }
     public List<IPackage> Dependents { get; }
 
-    public GitPackage(string name, string description, string cloneURL, PackageVersion version)
+    public GitPackage(string name, string description, string cloneURL, string updateURL, PackageVersion version)
     {
         Name = name;
         Description = description;
         CloneURL = cloneURL;
+        UpdateURL = updateURL;
         InstallCommands = new List<string>();
         UninstallCommands = new List<string>();
         Dependencies = new List<IPackage>();
         Dependents = new List<IPackage>();
     }
-    public GitPackage(string name, string description, string cloneURL, PackageVersion version, IEnumerable<string> installCommands, IEnumerable<string> uninstallCommands, IEnumerable<IPackage> dependencies) : this(name, description, cloneURL, version)
+    public GitPackage(string name, string description, string cloneURL, string updateURL, PackageVersion version, IEnumerable<string> installCommands, IEnumerable<string> uninstallCommands, IEnumerable<IPackage> dependencies) : this(name, description, cloneURL, updateURL, version)
     {
         InstallCommands = installCommands.ToList();
         UninstallCommands = uninstallCommands.ToList();
@@ -154,12 +161,18 @@ public class GitPackage : IPackage
 
     public static GitPackage LoadFromFile(string filePath)
     {
-        if(KONParser.Default.TryParse(File.ReadAllText(filePath), out KONNode pkgNode))
+        return ParseFromString(File.ReadAllText(filePath));
+    }
+    public static GitPackage ParseFromString(string packageString)
+    {
+        if(KONParser.Default.TryParse(packageString, out KONNode pkgNode))
         {
             if((string)pkgNode.Values["type"] == "Git")
             {
-                GitPackage output = new GitPackage((string)pkgNode.Values["name"], (string)pkgNode.Values["description"], (string)pkgNode.Values["cloneURL"], new PackageVersion((string)pkgNode.Values["version"]));
+                GitPackage output = new GitPackage((string)pkgNode.Values["name"], (string)pkgNode.Values["description"], (string)pkgNode.Values["cloneURL"], (string)pkgNode.Values["updateURL"], new PackageVersion((string)pkgNode.Values["version"]));
 
+                output.Version = new PackageVersion((string)pkgNode.Values["version"]);
+                
                 foreach(KONArray array in pkgNode.Arrays)
                 {
                     if(array.Name == "INSTALL_COMMANDS")
@@ -169,11 +182,18 @@ public class GitPackage : IPackage
                             output.InstallCommands.Add(str);
                         }
                     }
+                    if(array.Name == "UNINSTALL_COMMANDS")
+                    {
+                        foreach(string str in array)
+                        {
+                            output.UninstallCommands.Add(str);
+                        }
+                    }
                 }
 
                 return output;
             }
         }
-        throw new FormatException("The provided file did not conform to the expected format!");
+        throw new FormatException("The provided string did not conform to the expected format!");
     }
 }
