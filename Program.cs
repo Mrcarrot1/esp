@@ -211,6 +211,7 @@ namespace Esp
                     Console.ResetColor();
                 }
             }
+            InstalledPackages.Remove(package);
         }
 
         public static void LoadData()
