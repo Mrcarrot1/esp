@@ -31,7 +31,7 @@ ESP_PACKAGE
         sudo make install-esp
         echo -e 'An updated version of esp has been installed to a temporary location.\nPlease run esp-update as root to install it.'
     ]
-    UNINSTALL_COMMANDS
+    UNINSTALL_COMMANDS //A list of commands used to uninstall the package. Each command is run with a working directory of .
     [
         esp no-yes Are you sure? Continuing will remove esp. //esp built-in command interpreted by the application-used for integration with install process
         echo -e 'esp is not able to uninstall itself.\n Run esp-uninstall as root to remove it.'
