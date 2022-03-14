@@ -10,7 +10,7 @@ ESP_PACKAGE
     updateURL = https://raw.githubusercontent.com/Mrcarrot1/esp/main/porth.esp
     INSTALL_COMMANDS
     [
-        sh setup.sh
+        sudo sh setup.sh
     ]
     UNINSTALL_COMMANDS
     [

@@ -1,11 +1,11 @@
-//esp 0.1.0
+//esp 0.1.1
 //Information for esp package manager.
 ESP_PACKAGE
 {
     name = esp
     description = esp package manager.
     type = Git //Can be Git, Tarball, or Other
-    version = 0.1.0
+    version = 0.1.1
     cloneURL = https://github.com/Mrcarrot1/esp.git
     updateURL = https://raw.githubusercontent.com/Mrcarrot1/esp/main/esp-latest.esp
     INSTALL_COMMANDS
