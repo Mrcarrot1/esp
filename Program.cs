@@ -127,6 +127,18 @@ namespace Esp
 
         public static void InstallPackage(string package)
         {
+            if(InstalledPackages.ContainsKey(package))
+            {
+                Console.Write($"Package {package} is already installed. Reinstall?");
+                if(Utils.YesNoInput())
+                {
+                    UninstallPackage(package);
+                }
+                else
+                {
+                    return;
+                }
+            }
             Directory.CreateDirectory($@"{Utils.HomePath}/.cache/esp/pkg");
             IPackage? pkg = null;
             if(Packages.ContainsKey(package))
@@ -213,8 +225,11 @@ namespace Esp
                         if((string)node.Values["type"] == "Git")
                         {
                             GitPackage pkg = GitPackage.ParseFromString(KONWriter.Default.Write(node));
-                            Packages.Add(pkg.Name, pkg);
-                            InstalledPackages.Add(pkg.Name, pkg);
+                            if(!Packages.ContainsKey(pkg.Name))
+                            {
+                                Packages.Add(pkg.Name, pkg);
+                                InstalledPackages.Add(pkg.Name, pkg);
+                            }
                         }
                     }
                 }
