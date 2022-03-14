@@ -83,7 +83,7 @@ public struct PackageVersion
             Minor = 0;
             Patch = 0;
             Rolling = true;
-            if(versionSplit.Length > 0)
+            if(versionSplit.Length > 1)
             {
                 Prerelease = true;
                 PrereleaseType = versionSplit[1];

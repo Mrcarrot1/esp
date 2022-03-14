@@ -7,7 +7,10 @@ namespace Esp
 {
     public class Utils
     {
-        public static string FormatCommand(string command, string currentPackage)
+        private static string? homeVarPath = Environment.GetEnvironmentVariable("HOME");
+        public static string HomePath = homeVarPath != null ? homeVarPath : $@"/home/{Environment.UserName}";
+
+        public static string FormatCommand(string command)
         {
             bool readingVar = false;
             string currentVar = "";
@@ -24,9 +27,7 @@ namespace Esp
                             commandFormatted = commandFormatted.Replace($"${currentVar}", Program.BuildVars[currentVar]);
                         else
                         {
-                            Console.ForegroundColor = ConsoleColor.Red;
-                            Console.WriteLine($"[esp] Error: {currentPackage}: build variable ${currentVar} not found");
-                            Console.ResetColor();
+                            throw new FormatException($"Build variable {currentVar} not found!");
                         }
                         readingVar = false;
                         currentVar = "";
@@ -45,12 +46,12 @@ namespace Esp
         /// </summary>
         /// <param name="command"></param>
         /// <param name="directory"></param>
-        public static void RunCommand(string command, string directory)
+        public static void RunCommand(string command, string? cwd = null)
         {
             //Check for esp built-in commands. Otherwise, run them in a shell.
             string[] commandSplit = command.Split(' ');
             if(commandSplit[0] != "esp")
-                ExecuteShellCommand(command, directory);
+                ExecuteShellCommand(command, cwd);
             else
             {
                 if(commandSplit[1] == "yes-no")
@@ -83,7 +84,7 @@ namespace Esp
                 }
                 //If not an esp package management command, run it as an esp shell command
                 else
-                    ExecuteShellCommand(command, directory);
+                    ExecuteShellCommand(command, cwd);
             }
         }
 

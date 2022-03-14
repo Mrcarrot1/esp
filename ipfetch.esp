@@ -1,0 +1,18 @@
+//ipfetch rolling
+//Information for esp package manager
+ESP_PACKAGE
+{
+    name = ipfetch
+    description = Neofetch like tool that can look up IPs.
+    type = Git
+    version = rolling
+    cloneURL = https://github.com/trakBan/ipfetch
+    INSTALL_COMMANDS
+    [
+        sh setup.sh
+    ]
+    UNINSTALL_COMMANDS
+    [
+        sudo rm /usr/bin/ipfetch
+    ]
+}

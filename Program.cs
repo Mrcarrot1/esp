@@ -39,8 +39,14 @@ namespace Esp
             GitPackage espPackage = new GitPackage("esp", "esp package manager.", "git@github.com:Mrcarrot1/esp", espInstallCommands, espDependencies);
             Packages.Add("esp", espPackage); */
 
-            GitPackage espPackage = GitPackage.LoadFromFile($@"/home/mrcarrot/esp/esp-latest.esp");
-            Packages.Add("esp", espPackage);
+            /* foreach(string file in Directory.GetFiles(@"/home/mrcarrot/esp"))
+            {
+                if(file.EndsWith(".esp"))
+                {
+                    GitPackage package = GitPackage.LoadFromFile(file);
+                    Packages.Add(package.Name, package);
+                }
+            }*/
 
             if(Environment.UserName == "root")
             {
@@ -113,16 +119,28 @@ namespace Esp
 
         public static void InstallPackage(string package)
         {
-            Directory.CreateDirectory($@"/home/{Environment.UserName}/.cache/esp/pkg");
+            Directory.CreateDirectory($@"{Utils.HomePath}/.cache/esp/pkg");
+            IPackage? pkg = null;
             if(Packages.ContainsKey(package))
             {
-                IPackage pkg = Packages[package];
+                pkg = Packages[package];
+            }
+            else if(File.Exists(package))
+            {
+                pkg = GitPackage.LoadFromFile(package);
+            }
+            else
+            {
+                Console.WriteLine($"{package}: package not found!");
+            }
+            if(pkg != null)
+            {
                 if(pkg is GitPackage gitPkg)
                 {
-                    if(Directory.Exists($@"/home/{Environment.UserName}/.cache/esp/pkg/{pkg.Name}"))
-                        Utils.ExecuteShellCommand($"git reset --hard; git pull", $@"/home/{Environment.UserName}/.cache/esp/pkg/{pkg.Name}");
+                    if(Directory.Exists($@"{Utils.HomePath}/.cache/esp/pkg/{pkg.Name}"))
+                        Utils.ExecuteShellCommand($"git reset --hard; git pull", $@"{Utils.HomePath}/.cache/esp/pkg/{pkg.Name}");
                     else
-                        Utils.ExecuteShellCommand($"git clone {gitPkg.CloneURL} /home/{Environment.UserName}/.cache/esp/pkg/{pkg.Name}");
+                        Utils.ExecuteShellCommand($"git clone {gitPkg.CloneURL} {Utils.HomePath}/.cache/esp/pkg/{pkg.Name}");
                 }
                 //Implement other package types:
                 //Tarball
@@ -130,16 +148,21 @@ namespace Esp
                 
                 foreach(string command in pkg.InstallCommands)
                 {
-                    //Create a copy of the command string to modify
-                    string commandFormatted = Utils.FormatCommand(command, package);
-                    //Run the command
-                    Utils.RunCommand(commandFormatted, $@"/home/{Environment.UserName}/.cache/esp/pkg/{pkg.Name}");
+                    try
+                    {
+                        //Create a copy of the command string to reformat.
+                        string commandFormatted = Utils.FormatCommand(command);
+                        //Run the command- note that RunCommand includes esp built-in commands, whereas ExecuteShellCommand does not.
+                        Utils.RunCommand(commandFormatted, Environment.CurrentDirectory);
+                    }
+                    catch(FormatException e)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"[esp] Error installing {package}: {e.Message}");
+                        Console.ResetColor();
+                    }
                 }
                 InstalledPackages.Add(package, pkg);
-            }
-            else
-            {
-                Console.WriteLine($"{package}: package not found!");
             }
         }
 
@@ -154,8 +177,17 @@ namespace Esp
             IPackage pkg = InstalledPackages[package];
             foreach(string command in pkg.UninstallCommands)
             {
-                string commandFormatted = Utils.FormatCommand(command, package);
-                Utils.RunCommand(commandFormatted, Environment.CurrentDirectory);
+                try
+                {
+                    string commandFormatted = Utils.FormatCommand(command);
+                    Utils.RunCommand(commandFormatted, Environment.CurrentDirectory);
+                }
+                catch(FormatException e)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"[esp] Error uninstalling {package}: {e.Message}");
+                    Console.ResetColor();
+                }
             }
         }
 
