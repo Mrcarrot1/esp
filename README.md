@@ -24,7 +24,7 @@ ESP_PACKAGE
     type = Git //Can be Git, Tarball, or Other
     version = 0.1.0 //Can be rolling, rolling-<prerelease label>, or a semantic version string
     cloneURL = ssh://git@github.com:Mrcarrot1/esp.git //For a git package, the link to the repository to clone.
-    updateURL = https://raw.githubusercontent.com/Mrcarrot1/esp/main/esp-latest.esp?token=GHSAT0AAAAAABQCIF2IQSKV54IAN6FNB7CUYRLVLPQ //The location from which an updated version of this file can be downloaded. 
+    updateURL = https://raw.githubusercontent.com/Mrcarrot1/esp/main/esp-latest.esp //The location from which an updated version of this file can be downloaded. 
     INSTALL_COMMANDS //This is a list of bash commands used to install the package. Each command is run with a working directory of ~/.cache/esp/<package> and does not run in the same session as previously run commands.
     [
         make -j $THREADS
