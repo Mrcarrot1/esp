@@ -217,7 +217,45 @@ namespace Esp
                     }
                 }
             }
-            
+        }
+
+        public static void WriteData()
+        {
+            KONNode outputNode = new KONNode("ESP_INSTALLED_PACKAGES");
+            foreach(IPackage package in InstalledPackages.Values)
+            {
+                KONNode pkgNode = new KONNode("PACKAGE");
+
+                pkgNode.AddValue("name", package.Name);
+                pkgNode.AddValue("description", package.Description);
+                pkgNode.AddValue("version", package.Version.ToString());
+                pkgNode.AddValue("type", package.Type.ToString());
+                pkgNode.AddValue("updateURL", package.UpdateURL);
+
+                if(package is GitPackage gitPackage)
+                {
+                    pkgNode.AddValue("cloneURL", gitPackage.CloneURL);
+                }
+
+                KONArray installArray = new KONArray("INSTALL_COMMANDS");
+                foreach(string cmd in package.InstallCommands)
+                {
+                    installArray.AddItem(cmd);
+                }
+                pkgNode.AddArray(installArray);
+
+                KONArray uninstallArray = new KONArray("UNINSTALL_COMMANDS");
+                foreach(string cmd in package.UninstallCommands)
+                {
+                    uninstallArray.AddItem(cmd);
+                }
+                pkgNode.AddArray(uninstallArray);
+
+                outputNode.AddChild(pkgNode);
+            }
+            File.WriteAllText($@"{Utils.HomePath}/.cache/esp/InstalledPackages.esp.temp", Utils.konWriter.Write(outputNode));
+
+            Utils.ExecuteShellCommand($"sudo mv {Utils.HomePath}/.cache/esp/InstalledPackages.esp.temp /var/esp/InstalledPackages.esp");
         }
 
         /// <summary>

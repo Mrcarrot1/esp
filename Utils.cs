@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using KarrotObjectNotation;
 
 namespace Esp
 {
@@ -9,6 +10,7 @@ namespace Esp
     {
         private static string? homeVarPath = Environment.GetEnvironmentVariable("HOME");
         public static string HomePath = homeVarPath != null ? homeVarPath : $@"/home/{Environment.UserName}";
+        public static KONWriter konWriter = new KONWriter(new KONWriterOptions(arrayInline: false));
 
         public static string FormatCommand(string command)
         {
