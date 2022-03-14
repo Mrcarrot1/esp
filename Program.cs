@@ -212,6 +212,7 @@ namespace Esp
                 }
             }
             InstalledPackages.Remove(package);
+            WriteData();
         }
 
         public static void LoadData()
