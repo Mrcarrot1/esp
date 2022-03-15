@@ -84,6 +84,15 @@ namespace Esp
                         return;
                     }
                 }
+                else if(commandSplit[1] == "alert")
+                {
+                    string message = "";
+                    for(int i = 2; i < commandSplit.Length; i++)
+                    {
+                        message += commandSplit[i] + ' ';
+                    }
+                    Console.Write(message);
+                }
                 //If not an esp package management command, run it as an esp shell command
                 else
                     ExecuteShellCommand(command, cwd);
@@ -138,6 +147,49 @@ namespace Esp
                 Console.Write("Please enter y or n!");
                 return YesNoInput(yesDefault);
             }
+        }
+
+        /// <summary>
+        /// Compares two version strings. Returns -1 if the current version is older, 0 if they are the same, and 1 if the current version is newer.
+        /// </summary>
+        /// <param name="currentVersion"></param>
+        /// <param name="otherVersion"></param>
+        /// <returns></returns>
+        public static int CompareVersions(PackageVersion currentVersion, PackageVersion otherVersion)
+        {
+            //If it's a rolling release, assume the other version is newer
+            if(otherVersion.Rolling)
+            {
+                return -1;
+            }
+
+            //Check major version numbers
+            if(otherVersion.Major > currentVersion.Major) return -1;
+            if(otherVersion.Major < currentVersion.Major) return 1;
+
+            //Check minor version numbers
+            if(otherVersion.Minor > currentVersion.Minor) return -1;
+            if(otherVersion.Minor < currentVersion.Minor) return 1;
+
+            //Check patch numbers
+            if(otherVersion.Patch > currentVersion.Patch) return -1;
+            if(otherVersion.Patch < currentVersion.Patch) return 1;
+
+            //If all the previous checks were false, the version numbers are equal.
+            //The prerelease of a given version is assumed to be older.
+            if(otherVersion.Prerelease && !currentVersion.Prerelease) return 1;
+            if(currentVersion.Prerelease && !otherVersion.Prerelease) return -1;
+
+            //If both are prereleases of the same version, check their labels against each other
+            if(currentVersion.Prerelease && otherVersion.Prerelease)
+            {
+                //Sort the strings alphabetically, then return that in reverse.
+                //This is because of the way that semantic versioning handles prerelease labels.
+                return -StringComparer.InvariantCulture.Compare(currentVersion.PrereleaseType, otherVersion.PrereleaseType);
+            }
+
+            //If we get to this point, the versions are equal.
+            return 0;
         }
     }
 }

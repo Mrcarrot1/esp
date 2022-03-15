@@ -7,7 +7,7 @@ ESP_PACKAGE
     type = Git
     version = rolling
     cloneURL = https://github.com/trakBan/ipfetch
-    updateURL = https://raw.githubusercontent.com/Mrcarrot1/esp/main/porth.esp
+    updateURL = https://raw.githubusercontent.com/Mrcarrot1/esp/main/ExamplePackages/ipfetch.esp
     INSTALL_COMMANDS
     [
         sudo sh setup.sh

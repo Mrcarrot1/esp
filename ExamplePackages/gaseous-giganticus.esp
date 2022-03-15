@@ -1,0 +1,20 @@
+//gaseous-giganticus rolling
+//Information for esp package manager
+ESP_PACKAGE
+{
+    name = gaseous-giganticus
+    description = Procedurally generates gas giant cubemap textures for the game Space Nerds In Space. 
+    type = Git
+    version = rolling
+    cloneURL = https://github.com/smcameron/gaseous-giganticus
+    updateURL = https://raw.githubusercontent.com/Mrcarrot1/esp/main/ExamplePackages/gaseous-giganticus.esp
+    INSTALL_COMMANDS
+    [
+        make -j $THREADS
+        sudo cp gaseous-giganticus /usr/bin
+    ]
+    UNINSTALL_COMMANDS
+    [
+        sudo rm /usr/bin/gaseous-giganticus
+    ]
+}
