@@ -101,6 +101,13 @@ namespace Esp
                     {
                         for(int i = 1; i < args.Length; i++)
                         {
+                            if(args[i] == "*")
+                            {
+                                foreach(string pkg in InstalledPackages.Keys.ToArray())
+                                {
+                                    UninstallPackage(pkg);
+                                }
+                            }
                             if(!args[i].StartsWith("-")) //Check for esp flags and don't try to install them as packages
                                 UninstallPackage(args[i]);
                         }
@@ -158,7 +165,24 @@ namespace Esp
                 if(pkg is GitPackage gitPkg)
                 {
                     if(Directory.Exists($@"{Utils.HomePath}/.cache/esp/pkg/{pkg.Name}"))
-                        Utils.ExecuteShellCommand($"git reset --hard; git pull", $@"{Utils.HomePath}/.cache/esp/pkg/{pkg.Name}");
+                    {
+                        Utils.ExecuteShellCommand($"git reset --hard", $@"{Utils.HomePath}/.cache/esp/pkg/{pkg.Name}");
+                        Process gitPull = new Process();
+                        gitPull.StartInfo = new ProcessStartInfo("bash", "git pull")
+                        {
+                            WorkingDirectory = $@"{Utils.HomePath}/.cache/esp/pkg/{pkg.Name}",
+                            RedirectStandardOutput = true
+                        };
+                        
+                        gitPull.Start();
+                        string gitPullOutput = gitPull.StandardOutput.ReadToEnd();
+                        gitPull.WaitForExit();
+                        if(gitPullOutput.Contains("Already up to date") && InstalledPackages.ContainsKey(package))
+                        {
+                            Console.WriteLine($"Skipping up-to-date package {package}");
+                            return;
+                        }
+                    }
                     else
                         Utils.ExecuteShellCommand($"git clone {gitPkg.CloneURL} {Utils.HomePath}/.cache/esp/pkg/{pkg.Name}");
                 }

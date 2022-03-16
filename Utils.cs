@@ -12,6 +12,11 @@ namespace Esp
         public static string HomePath = homeVarPath != null ? homeVarPath : $@"/home/{Environment.UserName}";
         public static KONWriter konWriter = new KONWriter(new KONWriterOptions(arrayInline: false));
 
+        /// <summary>
+        /// Formats the given command by replacing variables with their other
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
         public static string FormatCommand(string command)
         {
             bool readingVar = false;
@@ -35,7 +40,7 @@ namespace Esp
                         currentVar = "";
                     }
                 }
-                if(command[i] == '$')
+                if(command[i] == '$' && (i != 0 && command[i - 1] != '\\'))
                 {
                     readingVar = true;
                 }
