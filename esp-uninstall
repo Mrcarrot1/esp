@@ -1,11 +1,20 @@
 #!/bin/bash
 
 echo "esp uninstall script: used to uninstall esp."
+echo "If you wish instead to uninstall a package installed via esp, use 'esp uninstall'."
 
 if [ "$EUID" -ne 0 ]
 then
     echo "This script must be run as root!"
     exit
+fi
+
+read -p "Are you sure you would like to continue? [y/N] " -n 1 -r
+echo    #move to a new line
+
+if [[ ! $REPLY =~ ^[Yy]$ ]]
+then
+    exit 1
 fi
 
 if [ -f "/usr/bin/esp" ]

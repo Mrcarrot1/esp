@@ -105,7 +105,9 @@ namespace Esp
                             {
                                 foreach(string pkg in InstalledPackages.Keys.ToArray())
                                 {
-                                    UninstallPackage(pkg);
+                                    //Don't uninstall esp- this prevents an infinite loop, as 'esp uninstall esp' calls 'esp uninstall *'
+                                    if(pkg != "esp")
+                                        UninstallPackage(pkg);
                                 }
                             }
                             if(!args[i].StartsWith("-")) //Check for esp flags and don't try to install them as packages
@@ -115,17 +117,41 @@ namespace Esp
                 }
                 if(args[0].ToLower() == "update")
                 {
-                    foreach(IPackage pkg in InstalledPackages.Values.ToArray())
+                    if(args.Length == 1)
                     {
-                        Directory.CreateDirectory($@"{Utils.HomePath}/.cache/esp/pkgs");
-                        Utils.ExecuteShellCommand($"curl {pkg.UpdateURL} -o {Utils.HomePath}/.cache/esp/pkgs/{pkg.Name}-temp.esp");
-                        GitPackage package = GitPackage.LoadFromFile($@"{Utils.HomePath}/.cache/esp/pkgs/{pkg.Name}-temp.esp");
-                        if(Utils.CompareVersions(pkg.Version, package.Version) == -1)
+                        foreach(IPackage pkg in InstalledPackages.Values.ToArray())
                         {
-                            InstallPackage($@"{Utils.HomePath}/.cache/esp/pkgs/{pkg.Name}-temp.esp");
+                            Directory.CreateDirectory($@"{Utils.HomePath}/.cache/esp/pkgs");
+                            Utils.ExecuteShellCommand($"curl {pkg.UpdateURL} -o {Utils.HomePath}/.cache/esp/pkgs/{pkg.Name}-temp.esp");
+                            GitPackage package = GitPackage.LoadFromFile($@"{Utils.HomePath}/.cache/esp/pkgs/{pkg.Name}-temp.esp");
+                            if(Utils.CompareVersions(pkg.Version, package.Version) == -1)
+                            {
+                                InstallPackage($@"{Utils.HomePath}/.cache/esp/pkgs/{pkg.Name}-temp.esp");
+                            }
+                        }
+                        WriteData();
+                    }
+                    else
+                    {
+                        for(int i = 1; i < args.Length; i++)
+                        {
+                            if(InstalledPackages.ContainsKey(args[i]))
+                            {
+                                IPackage pkg = InstalledPackages[args[i]];
+                                Directory.CreateDirectory($@"{Utils.HomePath}/.cache/esp/pkgs");
+                                Utils.ExecuteShellCommand($"curl {pkg.UpdateURL} -o {Utils.HomePath}/.cache/esp/pkgs/{pkg.Name}-temp.esp");
+                                GitPackage package = GitPackage.LoadFromFile($@"{Utils.HomePath}/.cache/esp/pkgs/{pkg.Name}-temp.esp");
+                                if(Utils.CompareVersions(pkg.Version, package.Version) == -1)
+                                {
+                                    InstallPackage($@"{Utils.HomePath}/.cache/esp/pkgs/{pkg.Name}-temp.esp");
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine($"[esp] package {args[i]} is not installed");
+                            }
                         }
                     }
-                    WriteData();
                 }
             }
         }

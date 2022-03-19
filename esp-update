@@ -1,6 +1,7 @@
 #!/bin/bash
 
 echo "esp self-update script: used to install updates to esp from a temporary location to /usr/bin/esp."
+echo "If you instead wish to update a package installed via esp, use 'esp update'."
 
 if [ "$EUID" -ne 0 ]
 then
