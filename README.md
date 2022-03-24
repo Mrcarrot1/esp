@@ -7,6 +7,7 @@ To build esp:
 * `make`
 * `sudo make install`
 * To run, you will need `bash` and `sudo` installed.
+* It is also recommended, once you have a functioning install of esp, to run `esp install esp-latest.esp`. This will allow esp to install updates to itself.
 * You may also need to install other utilities to build and install many packages. These may or may not be available from your distribution's package manager. Support for cross-distro dependency management is a planned feature.
 * If you have an existing esp installation, you should be able to update it with esp itself. If not(your build of esp is broken in some way), performing the above installation steps may help.
 
