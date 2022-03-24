@@ -21,6 +21,7 @@ ESP_PACKAGE
     [
         esp no-yes Are you sure? Continuing will remove esp.
         esp uninstall *
-        echo -e 'esp is not able to uninstall itself.\nRun esp-uninstall as root to remove it.'
+        esp alert esp is not able to uninstall itself.
+        esp alert Run esp-uninstall as root to remove it.
     ]
 }

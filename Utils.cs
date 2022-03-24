@@ -23,19 +23,19 @@ namespace Esp
             bool readingVar = false;
             string currentVar = "";
             string commandFormatted = command;
-            for(int i = 0; i < command.Length; i++)
+            for (int i = 0; i < command.Length; i++)
             {
-                if(readingVar)
+                if (readingVar)
                 {
-                    if(!char.IsWhiteSpace(command[i])) //Check for whitespace character to delineate variables
+                    if (!char.IsWhiteSpace(command[i])) //Check for whitespace character to delineate variables
                         currentVar += command[i];
-                    if(char.IsWhiteSpace(command[i]) || i == command.Length - 1) //Also check for end of string
+                    if (char.IsWhiteSpace(command[i]) || i == command.Length - 1) //Also check for end of string
                     {
                         //Check for esp built-in variables.
-                        if(Program.BuildVars.ContainsKey(currentVar))
+                        if (Program.BuildVars.ContainsKey(currentVar))
                             commandFormatted = commandFormatted.Replace($"${currentVar}", Program.BuildVars[currentVar]);
                         //If not an esp variable, check for an environment variable.
-                        else if(Environment.GetEnvironmentVariable(currentVar) != null)
+                        else if (Environment.GetEnvironmentVariable(currentVar) != null)
                             commandFormatted = commandFormatted.Replace($"${currentVar}", Environment.GetEnvironmentVariable(currentVar));
                         //Otherwise, the variable wasn't found.
                         else
@@ -46,7 +46,7 @@ namespace Esp
                         currentVar = "";
                     }
                 }
-                if(command[i] == '$' && (i != 0 && command[i - 1] != '\\'))
+                if (command[i] == '$' && (i != 0 && command[i - 1] != '\\'))
                 {
                     readingVar = true;
                 }
@@ -64,48 +64,50 @@ namespace Esp
         {
             //Check for esp built-in commands. Otherwise, run them in a shell.
             string[] commandSplit = command.Split(' ');
-            if(commandSplit[0] != "esp")
+            if (commandSplit[0] != "esp")
                 return ExecuteShellCommand(command, cwd);
             else
             {
-                if(commandSplit[1] == "yes-no")
+                if (commandSplit[1] == "yes-no")
                 {
                     string message = "";
-                    for(int i = 2; i < commandSplit.Length; i++)
+                    for (int i = 2; i < commandSplit.Length; i++)
                     {
                         message += commandSplit[i] + ' ';
                     }
                     message = message.Trim();
                     Console.Write(message);
-                    if(!YesNoInput(true))
+                    if (!YesNoInput(true))
                     {
                         return -1;
                     }
                     return 0;
                 }
-                else if(commandSplit[1] == "no-yes")
+                else if (commandSplit[1] == "no-yes")
                 {
                     string message = "";
-                    for(int i = 2; i < commandSplit.Length; i++)
+                    for (int i = 2; i < commandSplit.Length; i++)
                     {
                         message += commandSplit[i] + ' ';
                     }
                     message = message.Trim();
                     Console.Write(message);
-                    if(!YesNoInput())
+                    if (!YesNoInput())
                     {
                         return -1;
                     }
                     return 0;
                 }
-                else if(commandSplit[1] == "alert")
+                else if (commandSplit[1] == "alert")
                 {
                     string message = "";
-                    for(int i = 2; i < commandSplit.Length; i++)
+                    for (int i = 2; i < commandSplit.Length; i++)
                     {
                         message += commandSplit[i] + ' ';
                     }
-                    Console.Write(message);
+                    Console.ForegroundColor = ConsoleColor.Blue;
+                    Console.WriteLine(message);
+                    Console.ResetColor();
                     return 0;
                 }
                 //If not an esp package management command, run it as an esp shell command
@@ -121,21 +123,21 @@ namespace Esp
         /// <returns>The exit code of the process, or -1 if esp experienced an internal error</returns>
         public static int ExecuteShellCommand(string command, string? cwd = null)
         {
-            if(cwd == null)
+            if (cwd == null)
             {
                 cwd = Environment.CurrentDirectory;
             }
             ProcessStartInfo startInfo = new ProcessStartInfo("bash", $"-c \"{command}\"");
             startInfo.WorkingDirectory = cwd;
-            if(command.Split(' ')[0] != "echo" || command.Contains(">") || command.Contains("<") || command.Contains("|")) //If the command is just echo and hasn't been piped anywhere, don't bother printing it out first.
+            if (command.Split(' ')[0] != "echo" || command.Contains(">") || command.Contains("<") || command.Contains("|")) //If the command is just echo and hasn't been piped anywhere, don't bother printing it out first.
                 Console.WriteLine(command);
             var process = Process.Start(startInfo);
-            if(process != null)
+            if (process != null)
                 process.WaitForExit();
             else
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"[esp] Command \"{command}\" failed to run!");
+                Console.WriteLine($"esp: Command \"{command}\" failed to run!");
                 Console.ResetColor();
                 return -1;
             }
@@ -149,17 +151,17 @@ namespace Esp
         /// <returns></returns>
         public static bool YesNoInput(bool yesDefault = false)
         {
-            if(yesDefault)
+            if (yesDefault)
                 Console.Write(" [Y/n] ");
             else
                 Console.Write(" [y/N] ");
 
             string? input = Console.ReadLine();
-            if(input == null) return false; //If there's a problem reading input always assume no
+            if (input == null) return false; //If there's a problem reading input always assume no
             input = input.Trim().ToLower();
-            if(input == string.Empty) return yesDefault;
-            if(input == "y") return true;
-            if(input == "n") return false;
+            if (input == string.Empty) return yesDefault;
+            if (input == "y") return true;
+            if (input == "n") return false;
             else
             {
                 Console.Write("Please enter y or n!");
@@ -176,30 +178,30 @@ namespace Esp
         public static int CompareVersions(PackageVersion currentVersion, PackageVersion otherVersion)
         {
             //If it's a rolling release, assume the other version is newer
-            if(otherVersion.Rolling)
+            if (otherVersion.Rolling)
             {
                 return -1;
             }
 
             //Check major version numbers
-            if(otherVersion.Major > currentVersion.Major) return -1;
-            if(otherVersion.Major < currentVersion.Major) return 1;
+            if (otherVersion.Major > currentVersion.Major) return -1;
+            if (otherVersion.Major < currentVersion.Major) return 1;
 
             //Check minor version numbers
-            if(otherVersion.Minor > currentVersion.Minor) return -1;
-            if(otherVersion.Minor < currentVersion.Minor) return 1;
+            if (otherVersion.Minor > currentVersion.Minor) return -1;
+            if (otherVersion.Minor < currentVersion.Minor) return 1;
 
             //Check patch numbers
-            if(otherVersion.Patch > currentVersion.Patch) return -1;
-            if(otherVersion.Patch < currentVersion.Patch) return 1;
+            if (otherVersion.Patch > currentVersion.Patch) return -1;
+            if (otherVersion.Patch < currentVersion.Patch) return 1;
 
             //If all the previous checks were false, the version numbers are equal.
             //The prerelease of a given version is assumed to be older.
-            if(otherVersion.Prerelease && !currentVersion.Prerelease) return 1;
-            if(currentVersion.Prerelease && !otherVersion.Prerelease) return -1;
+            if (otherVersion.Prerelease && !currentVersion.Prerelease) return 1;
+            if (currentVersion.Prerelease && !otherVersion.Prerelease) return -1;
 
             //If both are prereleases of the same version, check their labels against each other
-            if(currentVersion.Prerelease && otherVersion.Prerelease)
+            if (currentVersion.Prerelease && otherVersion.Prerelease)
             {
                 //Sort the strings alphabetically, then return that in reverse.
                 //This is because of the way that semantic versioning handles prerelease labels.

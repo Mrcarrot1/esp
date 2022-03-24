@@ -7,7 +7,7 @@ using KarrotObjectNotation;
 /// <summary>
 /// Interface for package type classes to implement.
 /// </summary>
-public interface IPackage 
+public interface IPackage
 {
     /// <summary>
     /// The package's name.
@@ -73,8 +73,8 @@ public struct PackageVersion
     public override string ToString()
     {
         string output = $"{Major}.{Minor}.{Patch}";
-        if(Rolling) output =  "rolling";
-        if(Prerelease) output += $"-{PrereleaseType}";
+        if (Rolling) output = "rolling";
+        if (Prerelease) output += $"-{PrereleaseType}";
         return output;
     }
 
@@ -86,13 +86,13 @@ public struct PackageVersion
     {
         versionString = versionString.ToLower();
         string[] versionSplit = versionString.Split('-');
-        if(versionSplit[0] == "rolling")
+        if (versionSplit[0] == "rolling")
         {
             Major = 0;
             Minor = 0;
             Patch = 0;
             Rolling = true;
-            if(versionSplit.Length > 1)
+            if (versionSplit.Length > 1)
             {
                 Prerelease = true;
                 PrereleaseType = versionSplit[1];
@@ -111,7 +111,7 @@ public struct PackageVersion
             Patch = ver.Build;
             Rolling = false;
             Prerelease = versionSplit.Length > 1;
-            if(Prerelease)
+            if (Prerelease)
                 PrereleaseType = versionSplit[1];
             else
                 PrereleaseType = null;
@@ -127,12 +127,12 @@ public class GitPackage : IPackage
     public string Name { get; }
     public string Description { get; }
     public PackageVersion Version { get; set; }
-    public PackageType Type 
-    { 
+    public PackageType Type
+    {
         get
-        { 
+        {
             return PackageType.Git;
-        } 
+        }
     }
     public string UpdateURL { get; }
     /// <summary>
@@ -172,33 +172,33 @@ public class GitPackage : IPackage
     }
     public static GitPackage ParseFromString(string packageString)
     {
-        if(KONParser.Default.TryParse(packageString, out KONNode pkgNode))
+        if (KONParser.Default.TryParse(packageString, out KONNode pkgNode))
         {
-            if((string)pkgNode.Values["type"] == "Git")
+            if ((string)pkgNode.Values["type"] == "Git")
             {
                 GitPackage output = new GitPackage((string)pkgNode.Values["name"], (string)pkgNode.Values["description"], (string)pkgNode.Values["cloneURL"], (string)pkgNode.Values["updateURL"], new PackageVersion((string)pkgNode.Values["version"]));
 
                 output.Version = new PackageVersion((string)pkgNode.Values["version"]);
-                
-                foreach(KONArray array in pkgNode.Arrays)
+
+                foreach (KONArray array in pkgNode.Arrays)
                 {
-                    if(array.Name == "BUILD_COMMANDS")
+                    if (array.Name == "BUILD_COMMANDS")
                     {
-                        foreach(string str in array)
+                        foreach (string str in array)
                         {
                             output.BuildCommands.Add(str);
                         }
                     }
-                    if(array.Name == "INSTALL_COMMANDS")
+                    if (array.Name == "INSTALL_COMMANDS")
                     {
-                        foreach(string str in array)
+                        foreach (string str in array)
                         {
                             output.InstallCommands.Add(str);
                         }
                     }
-                    if(array.Name == "UNINSTALL_COMMANDS")
+                    if (array.Name == "UNINSTALL_COMMANDS")
                     {
-                        foreach(string str in array)
+                        foreach (string str in array)
                         {
                             output.UninstallCommands.Add(str);
                         }
