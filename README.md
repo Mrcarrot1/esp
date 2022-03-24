@@ -2,7 +2,7 @@
 esp is a package manager designed to build packages from source. It is based on spm, an unreleased package manager I designed to be intentionally terrible, but I realized that it was actually pretty cool, so here we are.
 
 To build esp:
-* Ensure that you have the .NET Core SDK >= 6.0 installed.
+* Ensure that you have the .NET Core 6.0 SDK installed.
 * Navigate to the repository's root directory
 * `make`
 * `sudo make install`
