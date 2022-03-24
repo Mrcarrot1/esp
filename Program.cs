@@ -99,7 +99,7 @@ namespace Esp
                         foreach (IPackage pkg in InstalledPackages.Values.ToArray())
                         {
                             Directory.CreateDirectory($@"{Utils.HomePath}/.cache/esp/pkgs");
-                            Utils.ExecuteShellCommand($"curl {pkg.UpdateURL} -o {Utils.HomePath}/.cache/esp/pkgs/{pkg.Name}-temp.esp");
+                            Utils.ExecuteShellCommand($"curl -SsL {pkg.UpdateURL} -o {Utils.HomePath}/.cache/esp/pkgs/{pkg.Name}-temp.esp");
                             GitPackage package = GitPackage.LoadFromFile($@"{Utils.HomePath}/.cache/esp/pkgs/{pkg.Name}-temp.esp");
                             if (Utils.CompareVersions(pkg.Version, package.Version) == -1)
                             {
@@ -181,6 +181,7 @@ namespace Esp
                     if (Directory.Exists($@"{Utils.HomePath}/.cache/esp/pkg/{pkg.Name}"))
                     {
                         Utils.ExecuteShellCommand($"git reset --hard; git fetch", $@"{Utils.HomePath}/.cache/esp/pkg/{pkg.Name}");
+                        Console.WriteLine("esp: Checking git status...");
                         Process gitStatus = new Process();
                         gitStatus.StartInfo = new ProcessStartInfo("bash", "-c \"git status -sb\"")
                         {
