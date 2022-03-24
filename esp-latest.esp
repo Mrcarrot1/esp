@@ -8,9 +8,12 @@ ESP_PACKAGE
     version = rolling-alpha
     cloneURL = https://github.com/Mrcarrot1/esp.git
     updateURL = https://raw.githubusercontent.com/Mrcarrot1/esp/main/esp-latest.esp
-    INSTALL_COMMANDS
+    BUILD_COMMANDS
     [
         make -j $THREADS
+    ]
+    INSTALL_COMMANDS
+    [
         sudo make install-esp
         echo -e 'An updated version of esp has been installed to a temporary location.\nPlease run esp-update as root to install it.'
     ]

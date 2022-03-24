@@ -10,10 +10,11 @@ namespace Esp
     {
         private static string? homeVarPath = Environment.GetEnvironmentVariable("HOME");
         public static string HomePath = homeVarPath != null ? homeVarPath : $@"/home/{Environment.UserName}";
+        public static string LogPath = $@"{HomePath}/.config/esp/logs";
         public static KONWriter konWriter = new KONWriter(new KONWriterOptions(arrayInline: false));
 
         /// <summary>
-        /// Formats the given command by replacing variables with their other
+        /// Formats the given command by replacing variables with their values.
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
@@ -30,8 +31,13 @@ namespace Esp
                         currentVar += command[i];
                     if(char.IsWhiteSpace(command[i]) || i == command.Length - 1) //Also check for end of string
                     {
+                        //Check for esp built-in variables.
                         if(Program.BuildVars.ContainsKey(currentVar))
                             commandFormatted = commandFormatted.Replace($"${currentVar}", Program.BuildVars[currentVar]);
+                        //If not an esp variable, check for an environment variable.
+                        else if(Environment.GetEnvironmentVariable(currentVar) != null)
+                            commandFormatted = commandFormatted.Replace($"${currentVar}", Environment.GetEnvironmentVariable(currentVar));
+                        //Otherwise, the variable wasn't found.
                         else
                         {
                             throw new FormatException($"Build variable {currentVar} not found!");
@@ -53,12 +59,13 @@ namespace Esp
         /// </summary>
         /// <param name="command"></param>
         /// <param name="directory"></param>
-        public static void RunCommand(string command, string? cwd = null)
+        /// <returns>The exit code of the process, or -1 if esp experienced an internal error.</returns>
+        public static int RunCommand(string command, string? cwd = null)
         {
             //Check for esp built-in commands. Otherwise, run them in a shell.
             string[] commandSplit = command.Split(' ');
             if(commandSplit[0] != "esp")
-                ExecuteShellCommand(command, cwd);
+                return ExecuteShellCommand(command, cwd);
             else
             {
                 if(commandSplit[1] == "yes-no")
@@ -72,8 +79,9 @@ namespace Esp
                     Console.Write(message);
                     if(!YesNoInput(true))
                     {
-                        return;
+                        return -1;
                     }
+                    return 0;
                 }
                 else if(commandSplit[1] == "no-yes")
                 {
@@ -86,8 +94,9 @@ namespace Esp
                     Console.Write(message);
                     if(!YesNoInput())
                     {
-                        return;
+                        return -1;
                     }
+                    return 0;
                 }
                 else if(commandSplit[1] == "alert")
                 {
@@ -97,10 +106,11 @@ namespace Esp
                         message += commandSplit[i] + ' ';
                     }
                     Console.Write(message);
+                    return 0;
                 }
                 //If not an esp package management command, run it as an esp shell command
                 else
-                    ExecuteShellCommand(command, cwd);
+                    return ExecuteShellCommand(command, cwd);
             }
         }
 
@@ -108,7 +118,8 @@ namespace Esp
         /// Executes the specified bash command.
         /// </summary>
         /// <param name="command"></param>
-        public static void ExecuteShellCommand(string command, string? cwd = null)
+        /// <returns>The exit code of the process, or -1 if esp experienced an internal error</returns>
+        public static int ExecuteShellCommand(string command, string? cwd = null)
         {
             if(cwd == null)
             {
@@ -126,7 +137,9 @@ namespace Esp
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"[esp] Command \"{command}\" failed to run!");
                 Console.ResetColor();
+                return -1;
             }
+            return process.ExitCode;
         }
 
         /// <summary>

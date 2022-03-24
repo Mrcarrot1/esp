@@ -8,12 +8,15 @@ ESP_PACKAGE
     version = rolling
     cloneURL = https://gitlab.com/tsoding/porth.git
     updateURL = https://raw.githubusercontent.com/Mrcarrot1/esp/main/ExamplePackages/porth.esp
-    INSTALL_COMMANDS
+    BUILD_COMMANDS
     [
         fasm -m 524288 ./bootstrap/porth-linux-x86_64.fasm
         chmod +x ./bootstrap/porth-linux-x86_64
         ./bootstrap/porth-linux-x86_64 com ./porth.porth
         ./porth com ./porth.porth
+    ]
+    INSTALL_COMMANDS
+    [
         sudo cp ./porth /usr/bin
     ]
     UNINSTALL_COMMANDS

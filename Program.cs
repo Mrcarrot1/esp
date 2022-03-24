@@ -16,37 +16,11 @@ namespace Esp
 
         public static void Main(string[] args)
         {
+            /// <summary>
+            /// Whether or not the data has changed for this run and, subsequently, whether or not to update it on disk.
+            /// </summary>
+            bool dataChanged = false;
             LoadData();
-            /* string[] porthInstallCommands = 
-            {
-                "fasm -m 524288 ./bootstrap/porth-linux-x86_64.fasm",
-                "chmod +x ./bootstrap/porth-linux-x86_64",
-                "./bootstrap/porth-linux-x86_64 com ./porth.porth",
-                "./porth com ./porth.porth",
-                "sudo cp ./porth /usr/bin"
-            };
-            IPackage[] porthDependencies = {};
-            GitPackage porthPackage = new GitPackage("porth", "Compiler for the Porth programming language created by Alexey Kutepov.", "https://gitlab.com/tsoding/porth", porthInstallCommands, porthDependencies);
-            Packages.Add("porth", porthPackage);
-
-            string[] espInstallCommands = 
-            {
-                "make -j $THREADS",
-                "sudo make install-esp",
-                "echo -e 'An updated version of esp has been installed to a temporary location.\nPlease run esp-update as root to install it.'"
-            };
-            IPackage[] espDependencies = {};
-            GitPackage espPackage = new GitPackage("esp", "esp package manager.", "git@github.com:Mrcarrot1/esp", espInstallCommands, espDependencies);
-            Packages.Add("esp", espPackage); */
-
-            /* foreach(string file in Directory.GetFiles(@"/home/mrcarrot/esp"))
-            {
-                if(file.EndsWith(".esp"))
-                {
-                    GitPackage package = GitPackage.LoadFromFile(file);
-                    Packages.Add(package.Name, package);
-                }
-            }*/
 
             if(Environment.UserName == "root")
             {
@@ -75,9 +49,9 @@ namespace Esp
                         for(int i = 1; i < args.Length; i++)
                         {
                             if(!args[i].StartsWith("-")) //Check for esp flags and don't try to install them as packages
-                                InstallPackage(args[i]);
+                                if(InstallPackage(args[i]))
+                                    dataChanged = true;
                         }
-                        WriteData();
                     }
                 }
                 if(args[0].ToLower() == "list-installed")
@@ -107,11 +81,13 @@ namespace Esp
                                 {
                                     //Don't uninstall esp- this prevents an infinite loop, as 'esp uninstall esp' calls 'esp uninstall *'
                                     if(pkg != "esp")
-                                        UninstallPackage(pkg);
+                                        if(UninstallPackage(pkg))
+                                            dataChanged = true;
                                 }
                             }
                             if(!args[i].StartsWith("-")) //Check for esp flags and don't try to install them as packages
-                                UninstallPackage(args[i]);
+                                if(UninstallPackage(args[i]))
+                                    dataChanged = true;
                         }
                     }
                 }
@@ -126,10 +102,10 @@ namespace Esp
                             GitPackage package = GitPackage.LoadFromFile($@"{Utils.HomePath}/.cache/esp/pkgs/{pkg.Name}-temp.esp");
                             if(Utils.CompareVersions(pkg.Version, package.Version) == -1)
                             {
-                                InstallPackage($@"{Utils.HomePath}/.cache/esp/pkgs/{pkg.Name}-temp.esp");
+                                if(InstallPackage($@"{Utils.HomePath}/.cache/esp/pkgs/{pkg.Name}-temp.esp"))
+                                    dataChanged = true;
                             }
                         }
-                        WriteData();
                     }
                     else
                     {
@@ -143,7 +119,8 @@ namespace Esp
                                 GitPackage package = GitPackage.LoadFromFile($@"{Utils.HomePath}/.cache/esp/pkgs/{pkg.Name}-temp.esp");
                                 if(Utils.CompareVersions(pkg.Version, package.Version) == -1)
                                 {
-                                    InstallPackage($@"{Utils.HomePath}/.cache/esp/pkgs/{pkg.Name}-temp.esp");
+                                    if(InstallPackage($@"{Utils.HomePath}/.cache/esp/pkgs/{pkg.Name}-temp.esp"))
+                                        dataChanged = true;
                                 }
                             }
                             else
@@ -154,22 +131,27 @@ namespace Esp
                     }
                 }
             }
+            if(dataChanged) WriteData();
         }
 
         
-
-        public static void InstallPackage(string package)
+        /// <summary>
+        /// Installs a package, either from the database with a given name, or from a provided package file.
+        /// </summary>
+        /// <param name="package">The package name or file location.</param>
+        /// <param name="confirm">Whether to ask the user for confirmation.</param>
+        public static bool InstallPackage(string package, bool confirm = true)
         {
             if(InstalledPackages.ContainsKey(package))
             {
                 Console.Write($"Package {package} is already installed. Reinstall?");
                 if(Utils.YesNoInput())
                 {
-                    UninstallPackage(package);
+                    UninstallPackage(package, false);
                 }
                 else
                 {
-                    return;
+                    return false;
                 }
             }
             Directory.CreateDirectory($@"{Utils.HomePath}/.cache/esp/pkg");
@@ -194,19 +176,20 @@ namespace Esp
                     {
                         Utils.ExecuteShellCommand($"git reset --hard", $@"{Utils.HomePath}/.cache/esp/pkg/{pkg.Name}");
                         Process gitPull = new Process();
-                        gitPull.StartInfo = new ProcessStartInfo("bash", "git pull")
+                        gitPull.StartInfo = new ProcessStartInfo("bash", "-c \"git pull\"")
                         {
                             WorkingDirectory = $@"{Utils.HomePath}/.cache/esp/pkg/{pkg.Name}",
                             RedirectStandardOutput = true
                         };
                         
                         gitPull.Start();
-                        string gitPullOutput = gitPull.StandardOutput.ReadToEnd();
                         gitPull.WaitForExit();
-                        if(gitPullOutput.Contains("Already up to date") && InstalledPackages.ContainsKey(package))
+                        string gitPullOutput = gitPull.StandardOutput.ReadToEnd();
+                        
+                        if(gitPullOutput.Contains("Already up to date") && InstalledPackages.ContainsKey(pkg.Name))
                         {
-                            Console.WriteLine($"Skipping up-to-date package {package}");
-                            return;
+                            Console.WriteLine($"Skipping up-to-date package {pkg.Name}.");
+                            return false;
                         }
                     }
                     else
@@ -214,36 +197,67 @@ namespace Esp
                 }
                 //Implement other package types:
                 //Tarball
-                //Other- install commands include download instructions
-                
-                foreach(string command in pkg.InstallCommands)
+                //Other- build commands include download instructions
+
+                if(confirm)
                 {
-                    try
+                    Console.Write($"[esp] About to uninstall the current version of package {pkg.Name}. Continue?");
+                    if(!Utils.YesNoInput(true)) return false;
+                }
+
+                try
+                {
+                    foreach(string command in pkg.BuildCommands)
                     {
                         //Create a copy of the command string to reformat.
                         string commandFormatted = Utils.FormatCommand(command);
                         //Run the command- note that RunCommand includes esp built-in commands, whereas ExecuteShellCommand does not.
+                        int status = Utils.RunCommand(commandFormatted, $@"{Utils.HomePath}/.cache/esp/pkg/{pkg.Name}");
+                        if(status != 0)
+                        {
+                            
+                        }
+                    }
+                    
+                    foreach(string command in pkg.InstallCommands)
+                    {
+                        string commandFormatted = Utils.FormatCommand(command);
                         Utils.RunCommand(commandFormatted, $@"{Utils.HomePath}/.cache/esp/pkg/{pkg.Name}");
                     }
-                    catch(Exception e)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine($"[esp] Error installing {package}: {e.Message}");
-                        Console.ResetColor();
-                    }
                 }
+                catch(Exception e)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"[esp] Error installing {package}: {e.Message}");
+                    Console.ResetColor();
+                }
+
+
                 if(InstalledPackages.ContainsKey(package))
                     InstalledPackages.Remove(package);
                 InstalledPackages.Add(package, pkg);
+                return true;
             }
+            return false;
         }
 
-        public static void UninstallPackage(string package)
+        /// <summary>
+        /// Uninstalls the specified package.
+        /// </summary>
+        /// <param name="package">The package's name.</param>
+        /// <param name="confirm">Whether to ask the user for confirmation.</param>
+        public static bool UninstallPackage(string package, bool confirm = true)
         {
             if(!InstalledPackages.ContainsKey(package))
             {
                 Console.WriteLine($"Package {package} is not installed!");
-                return;
+                return false;
+            }
+
+            if(confirm)
+            {
+                Console.Write($"[esp] About to uninstall package {package}. Continue?");
+                if(!Utils.YesNoInput(true)) return false;
             }
 
             IPackage pkg = InstalledPackages[package];
@@ -259,12 +273,16 @@ namespace Esp
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine($"[esp] Error uninstalling {package}: {e.Message}");
                     Console.ResetColor();
+                    return false;
                 }
             }
             InstalledPackages.Remove(package);
-            WriteData();
+            return true;
         }
 
+        /// <summary>
+        /// Loads in data about currently installed packages.
+        /// </summary>
         public static void LoadData()
         {
             if(File.Exists("/var/esp/InstalledPackages.esp"))
@@ -288,6 +306,9 @@ namespace Esp
             }
         }
 
+        /// <summary>
+        /// Updates the installed package data on disk.
+        /// </summary>
         public static void WriteData()
         {
             KONNode outputNode = new KONNode("ESP_INSTALLED_PACKAGES");
@@ -323,6 +344,8 @@ namespace Esp
                 outputNode.AddChild(pkgNode);
             }
             File.WriteAllText($@"{Utils.HomePath}/.cache/esp/InstalledPackages.esp.temp", Utils.konWriter.Write(outputNode));
+
+            Console.WriteLine("[esp] Moving stored data from temporary location(will require root access)");
 
             Utils.ExecuteShellCommand($"sudo mv {Utils.HomePath}/.cache/esp/InstalledPackages.esp.temp /var/esp/InstalledPackages.esp");
         }

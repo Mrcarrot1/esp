@@ -8,9 +8,12 @@ ESP_PACKAGE
     version = rolling
     cloneURL = https://github.com/smcameron/gaseous-giganticus
     updateURL = https://raw.githubusercontent.com/Mrcarrot1/esp/main/ExamplePackages/gaseous-giganticus.esp
-    INSTALL_COMMANDS
+    BUILD_COMMANDS
     [
         make -j $THREADS
+    ]
+    INSTALL_COMMANDS
+    [
         sudo cp gaseous-giganticus /usr/bin
     ]
     UNINSTALL_COMMANDS

@@ -31,9 +31,13 @@ public interface IPackage
     /// <value></value>
     PackageType Type { get; }
     /// <summary>
-    /// List of bash commands to run to build and install the package.
-    /// 
+    /// List of bash commands to run to build the package.
     /// For packages of type PackageType.Other, must also include download commands.
+    /// </summary>
+    /// <value></value>
+    List<string> BuildCommands { get; }
+    /// <summary>
+    /// List of bash commands to run to install the package.
     /// </summary>
     /// <value></value>
     List<string> InstallCommands { get; }
@@ -136,6 +140,7 @@ public class GitPackage : IPackage
     /// </summary>
     /// <value></value>
     public string CloneURL { get; }
+    public List<string> BuildCommands { get; }
     public List<string> InstallCommands { get; }
     public List<string> UninstallCommands { get; }
     public List<IPackage> Dependencies { get; }
@@ -147,13 +152,15 @@ public class GitPackage : IPackage
         Description = description;
         CloneURL = cloneURL;
         UpdateURL = updateURL;
+        BuildCommands = new List<string>();
         InstallCommands = new List<string>();
         UninstallCommands = new List<string>();
         Dependencies = new List<IPackage>();
         Dependents = new List<IPackage>();
     }
-    public GitPackage(string name, string description, string cloneURL, string updateURL, PackageVersion version, IEnumerable<string> installCommands, IEnumerable<string> uninstallCommands, IEnumerable<IPackage> dependencies) : this(name, description, cloneURL, updateURL, version)
+    public GitPackage(string name, string description, string cloneURL, string updateURL, PackageVersion version, IEnumerable<string> buildCommands, IEnumerable<string> installCommands, IEnumerable<string> uninstallCommands, IEnumerable<IPackage> dependencies) : this(name, description, cloneURL, updateURL, version)
     {
+        BuildCommands = buildCommands.ToList();
         InstallCommands = installCommands.ToList();
         UninstallCommands = uninstallCommands.ToList();
         Dependencies = dependencies.ToList();
@@ -175,6 +182,13 @@ public class GitPackage : IPackage
                 
                 foreach(KONArray array in pkgNode.Arrays)
                 {
+                    if(array.Name == "BUILD_COMMANDS")
+                    {
+                        foreach(string str in array)
+                        {
+                            output.BuildCommands.Add(str);
+                        }
+                    }
                     if(array.Name == "INSTALL_COMMANDS")
                     {
                         foreach(string str in array)
