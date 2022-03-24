@@ -15,7 +15,8 @@ ESP_PACKAGE
     INSTALL_COMMANDS
     [
         sudo make install-esp
-        echo -e 'An updated version of esp has been installed to a temporary location.\nPlease run esp-update as root to install it.'
+        esp alert An updated version of esp has been installed to a temporary location.
+        esp alert Please run esp-update as root to install it.
     ]
     UNINSTALL_COMMANDS
     [
