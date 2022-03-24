@@ -215,14 +215,24 @@ namespace Esp
                         int status = Utils.RunCommand(commandFormatted, $@"{Utils.HomePath}/.cache/esp/pkg/{pkg.Name}");
                         if(status != 0)
                         {
-                            
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine($"[esp] Command {commandFormatted} exited with code {status}");
+                            Console.ResetColor();
+                            break;
                         }
                     }
                     
                     foreach(string command in pkg.InstallCommands)
                     {
                         string commandFormatted = Utils.FormatCommand(command);
-                        Utils.RunCommand(commandFormatted, $@"{Utils.HomePath}/.cache/esp/pkg/{pkg.Name}");
+                        int status = Utils.RunCommand(commandFormatted, $@"{Utils.HomePath}/.cache/esp/pkg/{pkg.Name}");
+                        if(status != 0)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine($"[esp] Command {commandFormatted} exited with code {status}");
+                            Console.ResetColor();
+                            break;
+                        }
                     }
                 }
                 catch(Exception e)
