@@ -23,14 +23,15 @@ then
     exit 1
 fi
 
+if [ -f "/var/esp/InstalledPackages.esp" ]
+then
+    rm /var/esp/InstalledPackages.esp
+fi
+
 if [ -f "/usr/bin/esp" ]
 then
     rm /usr/bin/esp*
     echo "Finished uninstalling esp."
-fi
-
-if [ -d "/var/esp" ]
-then
-    rm -rf /var/esp
-    echo "Finished uninstalling esp."
+else
+    echo "esp binary not found!"
 fi
