@@ -40,9 +40,11 @@ namespace Esp
 
             BuildVars.Add("THREADS", Environment.ProcessorCount.ToString());
 
+            string version = Packages.ContainsKey("esp") ? Packages["esp"].Version.ToString() : "(unknown version)";
+
             if (args.Length == 0 || args[0].ToLower() == "help")
             {
-                Console.WriteLine($"esp rolling alpha: Quick and easy packages from source\n\nCommands: \n\nesp install <package> [additional packages]: Installs the specified package(s). \n\nesp list-installed: Lists all installed packages. \n\nesp uninstall <package>: Uninstalls the specified package. \n\nesp update [package(s)]: Updates the specified package(s), or all packages.");
+                Console.WriteLine($"esp {version}: Quick and easy packages from source\n\nCommands: \n\nesp install <package> [additional packages]: Installs the specified package(s). \n\nesp list-installed: Lists all installed packages. \n\nesp uninstall <package>: Uninstalls the specified package. \n\nesp update [package(s)]: Updates the specified package(s), or all packages.");
             }
             else
             {

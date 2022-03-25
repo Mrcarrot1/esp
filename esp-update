@@ -11,6 +11,10 @@ fi
 
 if [ -f "/usr/bin/esp_temp" ]
 then
+    if [ -f "/usr/bin/esp"]
+    then
+        rm /usr/bin/esp
+    fi
     mv /usr/bin/esp_temp /usr/bin/esp
     chmod +x /usr/bin/esp
     echo "Finished installing esp."
