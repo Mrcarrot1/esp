@@ -11,15 +11,22 @@ namespace Esp
 {
     public class Program
     {
+        /// <summary>
+        /// The variables used in building or installing esp packages.
+        /// </summary>
         public static Dictionary<string, string> BuildVars = new Dictionary<string, string>();
+        /// <summary>
+        /// The packages esp is aware of.
+        /// </summary>
         public static Dictionary<string, IPackage> Packages = new Dictionary<string, IPackage>();
+        /// <summary>
+        /// The packages currently installed on the system.
+        /// </summary>
         public static Dictionary<string, IPackage> InstalledPackages = new Dictionary<string, IPackage>();
 
         public static void Main(string[] args)
         {
-            /// <summary>
-            /// Whether or not the data has changed for this run and, subsequently, whether or not to update it on disk.
-            /// </summary>
+            //Whether or not the data has changed for this run and, subsequently, whether or not to update it on disk.
             bool dataChanged = false;
             LoadData();
 
@@ -33,7 +40,7 @@ namespace Esp
 
             BuildVars.Add("THREADS", Environment.ProcessorCount.ToString());
 
-            if (args.Length == 0)
+            if (args.Length == 0 || args[0].ToLower() == "help")
             {
                 Console.WriteLine($"esp rolling alpha: Quick and easy packages from source\n\nCommands: \n\nesp install <package> [additional packages]: Installs the specified package(s). \n\nesp list-installed: Lists all installed packages. \n\nesp uninstall <package>: Uninstalls the specified package. \n\nesp update [package(s)]: Updates the specified package(s), or all packages.");
             }
@@ -49,7 +56,7 @@ namespace Esp
                     {
                         for (int i = 1; i < args.Length; i++)
                         {
-                            if (!args[i].StartsWith("-")) //Check for esp flags and don't try to install them as packages
+                            if (!args[i].StartsWith("-")) //Check for command-line flags and don't try to install them as packages
                                 if (InstallPackage(args[i]))
                                     dataChanged = true;
                         }
@@ -106,6 +113,12 @@ namespace Esp
                                 if (InstallPackage($@"{Utils.HomePath}/.cache/esp/pkgs/{pkg.Name}-temp.esp"))
                                     dataChanged = true;
                             }
+                            else
+                            {
+                                Console.Write("esp: Warning: the downloaded package version is likely older than installed. Update anyway?");
+                                if (Utils.YesNoInput() && InstallPackage($@"{Utils.HomePath}/.cache/esp/pkgs/{pkg.Name}-temp.esp"))
+                                    dataChanged = true;
+                            }
                         }
                     }
                     else
@@ -123,6 +136,12 @@ namespace Esp
                                     if (InstallPackage($@"{Utils.HomePath}/.cache/esp/pkgs/{pkg.Name}-temp.esp"))
                                         dataChanged = true;
                                 }
+                                else
+                                {
+                                    Console.Write("esp: Warning: the downloaded package version is likely older than installed. Update anyway?");
+                                    if (Utils.YesNoInput() && InstallPackage($@"{Utils.HomePath}/.cache/esp/pkgs/{pkg.Name}-temp.esp"))
+                                        dataChanged = true;
+                                }
                             }
                             else
                             {
@@ -130,6 +149,10 @@ namespace Esp
                             }
                         }
                     }
+                }
+                else
+                {
+                    Console.WriteLine($"esp: Command {args[0]} not found.\nUse 'esp help' for command help.");
                 }
             }
             if (dataChanged) WriteData();
@@ -199,11 +222,11 @@ namespace Esp
                             Console.WriteLine($"esp: Skipping up-to-date package {pkg.Name}.");
                             return false;
                         }
+
+                        Utils.ExecuteShellCommand("git pull", $@"{Utils.HomePath}/.cache/esp/pkg/{pkg.Name}");
                     }
                     else
                         Utils.ExecuteShellCommand($"git clone {gitPkg.CloneURL} {Utils.HomePath}/.cache/esp/pkg/{pkg.Name}");
-
-                    Utils.ExecuteShellCommand("git pull", $@"{Utils.HomePath}/.cache/esp/pkg/{pkg.Name}");
                 }
 
                 try

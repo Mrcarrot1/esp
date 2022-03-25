@@ -9,7 +9,13 @@ namespace Esp
     public class Utils
     {
         private static string? homeVarPath = Environment.GetEnvironmentVariable("HOME");
+        /// <summary>
+        /// The path to the home directory (usually /home/username).
+        /// </summary>
         public static string HomePath = homeVarPath != null ? homeVarPath : $@"/home/{Environment.UserName}";
+        /// <summary>
+        /// The path to the directory in which esp logs are stored.
+        /// </summary>
         public static string LogPath = $@"{HomePath}/.config/esp/logs";
         public static KONWriter konWriter = new KONWriter(new KONWriterOptions(arrayInline: false));
 

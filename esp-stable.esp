@@ -1,13 +1,13 @@
-//esp rolling-beta
+//esp 0.1.0
 //Information for esp package manager.
 ESP_PACKAGE
 {
     name = esp
     description = esp package manager.
     type = Git
-    version = rolling-beta
-    cloneURL = https://github.com/Mrcarrot1/esp.git
-    updateURL = https://raw.githubusercontent.com/Mrcarrot1/esp/main/esp-latest.esp
+    version = 0.1.0
+    cloneURL = https://github.com/Mrcarrot1/esp.git -b stable
+    updateURL = https://raw.githubusercontent.com/Mrcarrot1/esp/main/esp-stable.esp
     BUILD_COMMANDS
     [
         make -j $THREADS

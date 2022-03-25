@@ -12,3 +12,5 @@ To build esp:
 * If you have an existing esp installation, you should be able to update it with esp itself. If not(your build of esp is broken in some way), performing the above installation steps may help.
 
 Instructions for creating packages and other documentation may be found on the [wiki](https://github.com/Mrcarrot1/esp/wiki).
+
+This branch is the development repository for esp and the source of the rolling-beta version of esp. Point releases are made from the stable branch.
