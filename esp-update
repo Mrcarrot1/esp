@@ -11,7 +11,7 @@ fi
 
 if [ -f "/usr/bin/esp_temp" ]
 then
-    if [ -f "/usr/bin/esp"]
+    if [ -f "/usr/bin/esp" ]
     then
         rm /usr/bin/esp
     fi
