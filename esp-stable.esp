@@ -6,8 +6,8 @@ ESP_PACKAGE
     description = esp package manager.
     type = Git
     version = 0.1.1
-    cloneURL = https://github.com/Mrcarrot1/esp.git -b stable
-    updateURL = https://raw.githubusercontent.com/Mrcarrot1/esp/main/esp-stable.esp
+    cloneURL = https://github.com/Mrcarrot1/esp.git
+    updateURL = https://raw.githubusercontent.com/Mrcarrot1/esp/stable/esp-stable.esp
     BUILD_COMMANDS
     [
         make -j $THREADS
