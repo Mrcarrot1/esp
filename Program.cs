@@ -383,6 +383,9 @@ namespace Esp
 
             Console.WriteLine("esp: Moving stored data from temporary location(will require root access)");
 
+            if(!Directory.Exists(@"/var/esp"))
+                Utils.ExecuteShellCommand($"sudo mkdir /var/esp");
+
             Utils.ExecuteShellCommand($"sudo mv {Utils.HomePath}/.cache/esp/InstalledPackages.esp.temp /var/esp/InstalledPackages.esp");
         }
     }
