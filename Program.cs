@@ -62,7 +62,7 @@ namespace Esp
                         }
                     }
                 }
-                if (args[0].ToLower() == "list-installed")
+                else if (args[0].ToLower() == "list-installed")
                 {
                     if (InstalledPackages.Count == 0)
                     {
@@ -73,7 +73,7 @@ namespace Esp
                         Console.WriteLine($"{pkg.Name} {pkg.Version}");
                     }
                 }
-                if (args[0].ToLower() == "uninstall")
+                else if (args[0].ToLower() == "uninstall")
                 {
                     if (args.Length == 1)
                     {
@@ -99,7 +99,7 @@ namespace Esp
                         }
                     }
                 }
-                if (args[0].ToLower() == "update")
+                else if (args[0].ToLower() == "update")
                 {
                     if (args.Length == 1)
                     {
