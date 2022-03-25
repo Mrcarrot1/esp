@@ -28,3 +28,9 @@ then
     rm /usr/bin/esp*
     echo "Finished uninstalling esp."
 fi
+
+if [ -d "/var/esp" ]
+then
+    rm -rf /var/esp
+    echo "Finished uninstalling esp."
+fi
