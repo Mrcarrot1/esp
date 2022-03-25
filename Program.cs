@@ -168,18 +168,6 @@ namespace Esp
         /// <param name="confirm">Whether to ask the user for confirmation.</param>
         public static bool InstallPackage(string package, bool confirm = true)
         {
-            if (InstalledPackages.ContainsKey(package))
-            {
-                Console.Write($"esp: Package {package} is already installed. Reinstall?");
-                if (Utils.YesNoInput())
-                {
-                    UninstallPackage(package, false);
-                }
-                else
-                {
-                    return false;
-                }
-            }
             Directory.CreateDirectory($@"{Utils.HomePath}/.cache/esp/pkg");
             IPackage? pkg = null;
             if (Packages.ContainsKey(package))
@@ -198,7 +186,10 @@ namespace Esp
             {
                 if (confirm)
                 {
-                    Console.Write($"esp: About to uninstall the current version of package {pkg.Name}. Continue?");
+                    if(InstalledPackages.ContainsKey(pkg.Name))
+                        Console.Write($"esp: About to uninstall the current version of package {pkg.Name}. Continue?");
+                    else
+                        Console.Write($"esp: About to install package {pkg.Name}. Continue?");
                     if (!Utils.YesNoInput(true)) return false;
                 }
                 if (pkg is GitPackage gitPkg)
