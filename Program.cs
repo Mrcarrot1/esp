@@ -85,7 +85,7 @@ namespace Esp
                     {
                         for (int i = 1; i < args.Length; i++)
                         {
-                            if (args[i] == "*")
+                            if (args[i] == "-a")
                             {
                                 foreach (string pkg in InstalledPackages.Keys.ToArray())
                                 {
@@ -186,7 +186,7 @@ namespace Esp
             {
                 pkg = Packages[package];
             }
-            else if (File.Exists(package))
+            if (File.Exists(package))
             {
                 pkg = GitPackage.LoadFromFile(package);
             }
