@@ -23,7 +23,7 @@ namespace Esp
         /// The packages currently installed on the system.
         /// </summary>
         public static Dictionary<string, IPackage> InstalledPackages = new Dictionary<string, IPackage>();
-        
+
         public static string Alerts = "";
 
         public static void Main(string[] args)
@@ -197,9 +197,12 @@ namespace Esp
             }
             if (dataChanged) WriteData();
 
-            Console.ForegroundColor = ConsoleColor.Blue;
-            Console.WriteLine(Alerts);
-            Console.ResetColor();
+            if (Alerts != "")
+            {
+                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.WriteLine(Alerts);
+                Console.ResetColor();
+            }
         }
 
 
