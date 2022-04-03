@@ -126,11 +126,12 @@ namespace Esp
                                 }
                             }
                         }
-                        Console.Write($"esp: About to uninstall the current versions of the following packages:\n {pkgList}\nContinue?");
+                        Console.Write($"\nesp: About to uninstall the current versions of the following packages:\n {pkgList}\nContinue?");
                         if (Utils.YesNoInput(true))
                         {
                             foreach (IPackage pkg in pkgsToUpdate)
                             {
+                                Console.Write('\n');
                                 if (InstallPackage($@"{Utils.HomePath}/.cache/esp/pkgs/{pkg.Name}-temp.esp"))
                                     dataChanged = true;
                             }
@@ -180,6 +181,7 @@ namespace Esp
                         {
                             foreach (IPackage pkg in pkgsToUpdate)
                             {
+                                Console.Write('\n');
                                 if (InstallPackage($@"{Utils.HomePath}/.cache/esp/pkgs/{pkg.Name}-temp.esp"))
                                     dataChanged = true;
                             }
