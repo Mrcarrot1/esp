@@ -111,9 +111,7 @@ namespace Esp
                     {
                         message += commandSplit[i] + ' ';
                     }
-                    Console.ForegroundColor = ConsoleColor.Blue;
-                    Console.WriteLine(message);
-                    Console.ResetColor();
+                    Program.Alerts += '\n' + message;
                     return 0;
                 }
                 //If not an esp package management command, run it as an esp shell command
