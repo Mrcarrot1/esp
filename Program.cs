@@ -165,7 +165,7 @@ namespace Esp
                                         pkgList += $"{pkg.Name} ";
                                     }
                                 }
-                                else if (versionDiff != 0)
+                                if (versionDiff == 1)
                                 {
                                     Console.Write($"esp: Warning: the downloaded version of {pkg.Name} is likely older than installed. Update anyway?");
                                     if (Utils.YesNoInput())
