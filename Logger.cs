@@ -13,6 +13,7 @@ namespace Esp
         {
             firstRun = false;
             logPath = $@"{Utils.LogPath}/Log_{DateTime.Now.ToString("yyyy-MM-dd_HH:mm:ss")}.txt";
+            if (!Directory.Exists(Utils.LogPath)) Directory.CreateDirectory(Utils.LogPath);
             File.WriteAllText(logPath, "-----Log initiated for esp.-----\nRun by " + Environment.UserName + ". Local time: " + DateTime.Now + "; UTC: " + DateTime.UtcNow + ".\n---------------------------------------------");
 
         }

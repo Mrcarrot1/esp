@@ -33,6 +33,13 @@ namespace Esp
             {
                 if (readingVar)
                 {
+                    //Make an exception for ${command} syntax
+                    if (command[i] == '{')
+                    {
+                        while (command[i] != '}') i++;
+                        readingVar = false;
+                        currentVar = "";
+                    }
                     if (!char.IsWhiteSpace(command[i])) //Check for whitespace character to delineate variables
                         currentVar += command[i];
                     if (char.IsWhiteSpace(command[i]) || i == command.Length - 1) //Also check for end of string
@@ -65,7 +72,7 @@ namespace Esp
         /// </summary>
         /// <param name="command"></param>
         /// <param name="directory"></param>
-        /// <returns>The exit code of the process, or -1 if esp experienced an internal error.</returns>
+        /// <returns>The exit code of the process, -1 if esp experienced an internal error, or -2 if the build is being terminated due to user input.</returns>
         public static int RunCommand(string command, string? cwd = null)
         {
             //Check for esp built-in commands. Otherwise, run them in a shell.
@@ -85,7 +92,7 @@ namespace Esp
                     Console.Write(message);
                     if (!YesNoInput(true))
                     {
-                        return -1;
+                        return -2;
                     }
                     return 0;
                 }
@@ -100,7 +107,7 @@ namespace Esp
                     Console.Write(message);
                     if (!YesNoInput())
                     {
-                        return -1;
+                        return -2;
                     }
                     return 0;
                 }
@@ -164,8 +171,8 @@ namespace Esp
             if (input == null) return false; //If there's a problem reading input always assume no
             input = input.Trim().ToLower();
             if (input == string.Empty) return yesDefault;
-            if (input == "y") return true;
-            if (input == "n") return false;
+            if (input == "y" || input == "yes") return true;
+            if (input == "n" || input == "no") return false;
             else
             {
                 Console.Write("Please enter y or n!");

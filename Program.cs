@@ -40,7 +40,7 @@ namespace Esp
                 return;
             }
 
-            BuildVars.Add("THREADS", Environment.ProcessorCount.ToString());
+            BuildVars.Add("THREADS", (Environment.ProcessorCount / 2).ToString()); //Don't want to use the entire CPU during compile operations
 
             string version = Packages.ContainsKey("esp") ? Packages["esp"].Version.ToString() : "(unknown version)";
 
@@ -151,7 +151,8 @@ namespace Esp
                                 Directory.CreateDirectory($@"{Utils.HomePath}/.cache/esp/pkgs");
                                 Utils.ExecuteShellCommand($"curl -SsL {pkg.UpdateURL} -o {Utils.HomePath}/.cache/esp/pkgs/{pkg.Name}-temp.esp");
                                 GitPackage package = GitPackage.LoadFromFile($@"{Utils.HomePath}/.cache/esp/pkgs/{pkg.Name}-temp.esp");
-                                if (Utils.CompareVersions(pkg.Version, package.Version) == -1)
+                                int versionDiff = Utils.CompareVersions(pkg.Version, package.Version);
+                                if (versionDiff == -1)
                                 {
                                     bool update = true;
                                     if (package.Version.Rolling)
@@ -164,7 +165,7 @@ namespace Esp
                                         pkgList += $"{pkg.Name} ";
                                     }
                                 }
-                                else
+                                else if (versionDiff != 0)
                                 {
                                     Console.Write($"esp: Warning: the downloaded version of {pkg.Name} is likely older than installed. Update anyway?");
                                     if (Utils.YesNoInput())
@@ -269,6 +270,11 @@ namespace Esp
                         int status = Utils.RunCommand(commandFormatted, $@"{Utils.HomePath}/.cache/esp/pkg/{pkg.Name}");
                         if (status != 0)
                         {
+                            if(status == -2)
+                            {
+                                Console.WriteLine($"esp: Terminating build of {pkg.Name} due to user input.");
+                                return false;
+                            }
                             Console.ForegroundColor = ConsoleColor.Red;
                             Console.WriteLine($"esp: Command {commandFormatted} exited with code {status}");
                             Console.ResetColor();
@@ -282,6 +288,11 @@ namespace Esp
                         int status = Utils.RunCommand(commandFormatted, $@"{Utils.HomePath}/.cache/esp/pkg/{pkg.Name}");
                         if (status != 0)
                         {
+                            if(status == -2)
+                            {
+                                Console.WriteLine($"esp: Terminating install of {pkg.Name} due to user input.");
+                                return false;
+                            }
                             Console.ForegroundColor = ConsoleColor.Red;
                             Console.WriteLine($"esp: Command {commandFormatted} exited with code {status}");
                             Console.ResetColor();
