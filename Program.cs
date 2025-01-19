@@ -451,6 +451,13 @@ namespace Esp
                     pkgNode.AddValue("cloneURL", gitPackage.CloneURL);
                 }
 
+                KONArray buildArray = new KONArray("BUILD_COMMANDS");
+                foreach (string cmd in package.BuildCommands)
+                {
+                    buildArray.AddItem(cmd);
+                }
+                pkgNode.AddArray(buildArray);
+
                 KONArray installArray = new KONArray("INSTALL_COMMANDS");
                 foreach (string cmd in package.InstallCommands)
                 {

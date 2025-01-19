@@ -4,7 +4,7 @@ install:
 ifneq ("$(wildcard /usr/bin/esp)","")
 	rm /usr/bin/esp
 endif
-	cp bin/Release/net6.0/linux-x64/publish/esp /usr/bin
+	cp bin/Release/net9.0/linux-x64/publish/esp /usr/bin
 	chmod +x /usr/bin/esp
 	cp esp-update /usr/bin
 	chmod +x /usr/bin/esp-update
@@ -15,7 +15,7 @@ install-esp:
 ifneq ("$(wildcard /usr/bin/esp)","")
 	rm /usr/bin/esp
 endif
-	cp bin/Release/net6.0/linux-x64/publish/esp /usr/bin/esp_temp
+	cp bin/Release/net9.0/linux-x64/publish/esp /usr/bin/esp_temp
 	cp esp-update /usr/bin
 	chmod +x /usr/bin/esp-update
 	cp esp-uninstall /usr/bin

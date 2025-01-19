@@ -47,14 +47,7 @@ namespace Esp
                         //Check for esp built-in variables.
                         if (Program.BuildVars.ContainsKey(currentVar))
                             commandFormatted = commandFormatted.Replace($"${currentVar}", Program.BuildVars[currentVar]);
-                        //If not an esp variable, check for an environment variable.
-                        else if (Environment.GetEnvironmentVariable(currentVar) != null)
-                            commandFormatted = commandFormatted.Replace($"${currentVar}", Environment.GetEnvironmentVariable(currentVar));
-                        //Otherwise, the variable wasn't found.
-                        else
-                        {
-                            throw new FormatException($"Build variable {currentVar} not found!");
-                        }
+                        //Otherwise, leave it in for the shell to interpret.
                         readingVar = false;
                         currentVar = "";
                     }
